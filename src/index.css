@@ -198,6 +198,70 @@ All colors MUST be HSL.
     --spacing-md: 0.75rem;
     --spacing-lg: 1rem;
   }
+  
+  .theme-lcars {
+    /* LCARS - Starfleet computer aesthetic: warm pastels on deep black */
+    --background: 255 15% 6%;
+    --foreground: 35 90% 85%;
+
+    --editor-bg: 255 15% 7%;
+    --editor-active-line: 35 30% 18%;
+    --editor-selection: 20 90% 55%;
+    
+    --sidebar-bg: 255 18% 8%;
+    --sidebar-hover: 20 80% 20%;
+    --sidebar-active: 20 90% 24%;
+    
+    --titlebar-bg: 255 15% 5%;
+    --activitybar-bg: 255 20% 4%;
+    --activitybar-active: 20 95% 60%;
+    
+    --panel-bg: 255 18% 8%;
+    --panel-border: 25 30% 24%;
+    
+    --tab-bg: 255 18% 7%;
+    --tab-active-bg: 255 18% 9%;
+    --tab-hover: 25 30% 18%;
+    --tab-border: 25 30% 24%;
+    
+    --primary: 20 95% 60%; /* LCARS orange */
+    --primary-foreground: 0 0% 0%;
+    --primary-hover: 20 95% 68%;
+    
+    --text-primary: 35 90% 85%;
+    --text-secondary: 330 70% 80%; /* LCARS pink */
+    --text-muted: 210 15% 60%;
+    
+    --border: 25 30% 24%;
+    --border-subtle: 255 12% 12%;
+    
+    --statusbar-bg: 255 15% 5%;
+    --statusbar-text: 35 90% 85%;
+    
+    --input-bg: 255 15% 10%;
+    --input-border: 25 30% 28%;
+    --input-focus: 20 95% 60%;
+    
+    --scrollbar-thumb: 25 30% 28%;
+    --scrollbar-hover: 25 30% 34%;
+    
+    --syntax-keyword: 330 70% 75%;
+    --syntax-string: 50 95% 70%;
+    --syntax-number: 200 80% 70%;
+    --syntax-comment: 210 15% 50%;
+    --syntax-function: 20 95% 70%;
+    --syntax-variable: 35 90% 80%;
+    
+    --shadow-sm: 0 1px 3px 0 rgb(255 165 0 / 0.25);
+    --shadow: 0 2px 6px 0 rgb(255 165 0 / 0.25), 0 1px 2px -1px rgb(255 165 0 / 0.2);
+    --shadow-md: 0 4px 12px -1px rgb(255 165 0 / 0.25), 0 2px 8px -2px rgb(255 165 0 / 0.25);
+    
+    --radius: 1rem; /* LCARS pill shapes */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+  }
 }
 
 @layer base {

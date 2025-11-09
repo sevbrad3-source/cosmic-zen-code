@@ -1,4 +1,4 @@
-export type ThemeName = "granite" | "compact" | "hacker";
+export type ThemeName = "granite" | "compact" | "hacker" | "lcars";
 
 export interface Theme {
   name: string;
@@ -21,5 +21,10 @@ export const themes: Theme[] = [
     name: "Hacker Spy",
     id: "hacker",
     cssClass: "theme-hacker",
+  },
+  {
+    name: "LCARS",
+    id: "lcars",
+    cssClass: "theme-lcars",
   },
 ];

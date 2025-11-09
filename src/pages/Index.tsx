@@ -16,7 +16,7 @@ const Index = () => {
 
   useEffect(() => {
     // Remove all theme classes
-    document.documentElement.classList.remove("theme-granite", "theme-compact", "theme-hacker");
+    document.documentElement.classList.remove("theme-granite", "theme-compact", "theme-hacker", "theme-lcars");
     // Add current theme class
     document.documentElement.classList.add(`theme-${currentTheme}`);
   }, [currentTheme]);
