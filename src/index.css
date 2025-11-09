@@ -7,7 +7,7 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root {
+  :root, .theme-granite {
     /* Deep granite dark theme - VSCode inspired */
     --background: 0 0% 7%;
     --foreground: 0 0% 80%;
@@ -65,6 +65,134 @@ All colors MUST be HSL.
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
     
     --radius: 0.125rem;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+  }
+  
+  .theme-compact {
+    /* Ultra compact, tight, detailed theme - maximum information density */
+    --background: 0 0% 5%;
+    --foreground: 0 0% 88%;
+
+    --editor-bg: 0 0% 6%;
+    --editor-active-line: 0 0% 8%;
+    --editor-selection: 220 100% 50%;
+    
+    --sidebar-bg: 0 0% 4%;
+    --sidebar-hover: 0 0% 9%;
+    --sidebar-active: 0 0% 12%;
+    
+    --titlebar-bg: 0 0% 4%;
+    --activitybar-bg: 0 0% 3%;
+    --activitybar-active: 220 100% 55%;
+    
+    --panel-bg: 0 0% 5%;
+    --panel-border: 0 0% 18%;
+    
+    --tab-bg: 0 0% 5%;
+    --tab-active-bg: 0 0% 7%;
+    --tab-hover: 0 0% 8%;
+    --tab-border: 0 0% 18%;
+    
+    --primary: 220 100% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 220 100% 60%;
+    
+    --text-primary: 0 0% 88%;
+    --text-secondary: 0 0% 68%;
+    --text-muted: 0 0% 48%;
+    
+    --border: 0 0% 18%;
+    --border-subtle: 0 0% 14%;
+    
+    --statusbar-bg: 220 100% 55%;
+    --statusbar-text: 0 0% 100%;
+    
+    --input-bg: 0 0% 8%;
+    --input-border: 0 0% 22%;
+    --input-focus: 220 100% 55%;
+    
+    --scrollbar-thumb: 0 0% 28%;
+    --scrollbar-hover: 0 0% 35%;
+    
+    --syntax-keyword: 310 60% 72%;
+    --syntax-string: 120 40% 65%;
+    --syntax-number: 40 80% 70%;
+    --syntax-comment: 0 0% 48%;
+    --syntax-function: 200 80% 72%;
+    --syntax-variable: 180 60% 68%;
+    
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+    --shadow: 0 2px 4px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.5);
+    
+    --radius: 0.0625rem;
+    --spacing-xs: 0.125rem;
+    --spacing-sm: 0.25rem;
+    --spacing-md: 0.5rem;
+    --spacing-lg: 0.75rem;
+  }
+  
+  .theme-hacker {
+    /* Hacker spy agency aesthetic - matrix green, cyber professional */
+    --background: 0 0% 4%;
+    --foreground: 120 100% 75%;
+
+    --editor-bg: 120 20% 5%;
+    --editor-active-line: 120 25% 8%;
+    --editor-selection: 120 100% 35%;
+    
+    --sidebar-bg: 120 15% 6%;
+    --sidebar-hover: 120 20% 11%;
+    --sidebar-active: 120 25% 14%;
+    
+    --titlebar-bg: 0 0% 3%;
+    --activitybar-bg: 0 0% 2%;
+    --activitybar-active: 120 100% 45%;
+    
+    --panel-bg: 120 15% 6%;
+    --panel-border: 120 30% 15%;
+    
+    --tab-bg: 120 15% 5%;
+    --tab-active-bg: 120 20% 7%;
+    --tab-hover: 120 18% 9%;
+    --tab-border: 120 30% 15%;
+    
+    --primary: 120 100% 45%;
+    --primary-foreground: 0 0% 0%;
+    --primary-hover: 120 100% 55%;
+    
+    --text-primary: 120 100% 75%;
+    --text-secondary: 120 80% 55%;
+    --text-muted: 120 50% 40%;
+    
+    --border: 120 30% 15%;
+    --border-subtle: 120 20% 12%;
+    
+    --statusbar-bg: 0 0% 3%;
+    --statusbar-text: 120 100% 75%;
+    
+    --input-bg: 120 20% 8%;
+    --input-border: 120 40% 20%;
+    --input-focus: 120 100% 45%;
+    
+    --scrollbar-thumb: 120 40% 25%;
+    --scrollbar-hover: 120 50% 35%;
+    
+    --syntax-keyword: 120 100% 65%;
+    --syntax-string: 160 80% 60%;
+    --syntax-number: 180 100% 70%;
+    --syntax-comment: 120 40% 40%;
+    --syntax-function: 100 90% 65%;
+    --syntax-variable: 140 70% 60%;
+    
+    --shadow-sm: 0 1px 4px 0 rgb(0 255 0 / 0.15);
+    --shadow: 0 2px 6px 0 rgb(0 255 0 / 0.2), 0 1px 3px -1px rgb(0 255 0 / 0.2);
+    --shadow-md: 0 4px 10px -1px rgb(0 255 0 / 0.25), 0 2px 6px -2px rgb(0 255 0 / 0.25);
+    
+    --radius: 0rem;
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 0.75rem;
