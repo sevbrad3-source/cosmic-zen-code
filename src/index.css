@@ -72,71 +72,132 @@ All colors MUST be HSL.
   }
   
   .theme-compact {
-    /* Ultra compact, tight, detailed theme - maximum information density */
-    --background: 0 0% 5%;
-    --foreground: 0 0% 88%;
+    /* Compact - Ultra-tight military-grade tactical interface */
+    --background: 217 45% 8%;
+    --foreground: 210 50% 98%;
 
-    --editor-bg: 0 0% 6%;
-    --editor-active-line: 0 0% 8%;
-    --editor-selection: 220 100% 50%;
+    --editor-bg: 217 45% 10%;
+    --editor-active-line: 217 40% 15%;
+    --editor-selection: 217 100% 55%;
     
-    --sidebar-bg: 0 0% 4%;
-    --sidebar-hover: 0 0% 9%;
-    --sidebar-active: 0 0% 12%;
+    --sidebar-bg: 217 45% 7%;
+    --sidebar-hover: 217 40% 18%;
+    --sidebar-active: 217 70% 45%;
     
-    --titlebar-bg: 0 0% 4%;
-    --activitybar-bg: 0 0% 3%;
-    --activitybar-active: 220 100% 55%;
+    --titlebar-bg: 217 45% 5%;
+    --activitybar-bg: 217 45% 4%;
+    --activitybar-active: 217 100% 65%;
     
-    --panel-bg: 0 0% 5%;
-    --panel-border: 0 0% 18%;
+    --panel-bg: 217 45% 9%;
+    --panel-border: 217 30% 22%;
     
-    --tab-bg: 0 0% 5%;
-    --tab-active-bg: 0 0% 7%;
-    --tab-hover: 0 0% 8%;
-    --tab-border: 0 0% 18%;
+    --tab-bg: 217 45% 8%;
+    --tab-active-bg: 217 45% 12%;
+    --tab-hover: 217 35% 16%;
+    --tab-border: 217 30% 22%;
     
-    --primary: 220 100% 55%;
+    --primary: 210 100% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 100% 60%;
+    --primary-hover: 210 100% 70%;
     
-    --text-primary: 0 0% 88%;
-    --text-secondary: 0 0% 68%;
-    --text-muted: 0 0% 48%;
+    --text-primary: 210 50% 98%;
+    --text-secondary: 210 30% 80%;
+    --text-muted: 217 15% 55%;
     
-    --border: 0 0% 18%;
-    --border-subtle: 0 0% 14%;
+    --border: 217 30% 22%;
+    --border-subtle: 217 20% 15%;
     
-    --statusbar-bg: 220 100% 55%;
-    --statusbar-text: 0 0% 100%;
+    --statusbar-bg: 217 45% 5%;
+    --statusbar-text: 210 50% 98%;
     
-    --input-bg: 0 0% 8%;
-    --input-border: 0 0% 22%;
-    --input-focus: 220 100% 55%;
+    --input-bg: 217 40% 12%;
+    --input-border: 217 30% 28%;
+    --input-focus: 210 100% 60%;
     
-    --scrollbar-thumb: 0 0% 28%;
-    --scrollbar-hover: 0 0% 35%;
+    --scrollbar-thumb: 217 30% 28%;
+    --scrollbar-hover: 217 30% 36%;
     
-    --syntax-keyword: 310 60% 72%;
-    --syntax-string: 120 40% 65%;
-    --syntax-number: 40 80% 70%;
-    --syntax-comment: 0 0% 48%;
-    --syntax-function: 200 80% 72%;
-    --syntax-variable: 180 60% 68%;
+    --syntax-keyword: 290 85% 75%;
+    --syntax-string: 160 70% 70%;
+    --syntax-number: 30 100% 65%;
+    --syntax-comment: 217 15% 50%;
+    --syntax-function: 200 95% 70%;
+    --syntax-variable: 40 95% 70%;
     
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4);
-    --shadow: 0 2px 4px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
-    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.5);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+    --shadow: 0 2px 6px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 6px 12px -1px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.35);
     
-    --radius: 0.0625rem;
+    --radius: 0.125rem;
+    --spacing-xs: 0.0625rem;
+    --spacing-sm: 0.125rem;
+    --spacing-md: 0.25rem;
+    --spacing-lg: 0.375rem;
+  }
+  
+  .theme-hacker {
+    /* Hacker - Professional red team operations interface */
+    --background: 140 100% 1%;
+    --foreground: 120 100% 90%;
+
+    --editor-bg: 140 100% 2%;
+    --editor-active-line: 120 40% 6%;
+    --editor-selection: 120 100% 20%;
+    
+    --sidebar-bg: 140 100% 1%;
+    --sidebar-hover: 120 40% 8%;
+    --sidebar-active: 120 100% 12%;
+    
+    --titlebar-bg: 0 0% 0%;
+    --activitybar-bg: 0 0% 0%;
+    --activitybar-active: 120 100% 40%;
+    
+    --panel-bg: 140 100% 1.5%;
+    --panel-border: 120 40% 10%;
+    
+    --tab-bg: 140 100% 1%;
+    --tab-active-bg: 140 100% 3%;
+    --tab-hover: 120 40% 6%;
+    --tab-border: 120 40% 10%;
+    
+    --primary: 120 100% 40%;
+    --primary-foreground: 0 0% 0%;
+    --primary-hover: 120 100% 50%;
+    
+    --text-primary: 120 100% 90%;
+    --text-secondary: 120 90% 70%;
+    --text-muted: 120 40% 45%;
+    
+    --border: 120 40% 10%;
+    --border-subtle: 120 30% 6%;
+    
+    --statusbar-bg: 0 0% 0%;
+    --statusbar-text: 120 100% 90%;
+    
+    --input-bg: 140 100% 3%;
+    --input-border: 120 40% 12%;
+    --input-focus: 120 100% 40%;
+    
+    --scrollbar-thumb: 120 40% 12%;
+    --scrollbar-hover: 120 40% 18%;
+    
+    --syntax-keyword: 120 100% 60%;
+    --syntax-string: 100 90% 55%;
+    --syntax-number: 60 100% 50%;
+    --syntax-comment: 120 40% 35%;
+    --syntax-function: 140 100% 45%;
+    --syntax-variable: 80 100% 55%;
+    
+    --shadow-sm: 0 0 10px 0 rgb(0 255 0 / 0.3);
+    --shadow: 0 0 15px 0 rgb(0 255 0 / 0.3), 0 0 5px 0 rgb(0 255 0 / 0.2);
+    --shadow-md: 0 0 25px 0 rgb(0 255 0 / 0.4), 0 0 10px 0 rgb(0 255 0 / 0.3);
+    
+    --radius: 0;
     --spacing-xs: 0.125rem;
     --spacing-sm: 0.25rem;
     --spacing-md: 0.5rem;
     --spacing-lg: 0.75rem;
   }
-  
-  .theme-hacker {
-    /* Hacker spy agency aesthetic - matrix green, cyber professional */
     --background: 0 0% 4%;
     --foreground: 120 100% 75%;
 
