@@ -2,6 +2,8 @@ import { Send, X, Check, AlertCircle, Loader2, Copy, Play, Square } from "lucide
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import NetworkGraph from "./NetworkGraph";
+import ExploitFlow from "./ExploitFlow";
 
 interface RightPanelProps {
   activePanel: string;
@@ -86,55 +88,57 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         )}
         
         {activePanel === "exploits" && (
-          <div className="p-3 space-y-2">
-            <Input placeholder="Search exploits (CVE, name, platform)..." className="h-7 text-xs mb-2" />
-            <div className="text-xs text-text-muted mb-2">AVAILABLE EXPLOITS (2,847)</div>
-            {[
-              { id: "EXP-2024-001", name: "Apache Struts2 RCE", cve: "CVE-2023-50164", platform: "Linux/Windows", reliability: 95, severity: "critical" },
-              { id: "EXP-2023-287", name: "Windows SMB Privilege Escalation", cve: "CVE-2023-23397", platform: "Windows", reliability: 89, severity: "high" },
-              { id: "EXP-2024-012", name: "Jenkins Script Console RCE", cve: "CVE-2024-23897", platform: "Java/Linux", reliability: 98, severity: "critical" },
-              { id: "EXP-2023-445", name: "ProFTPD Arbitrary Code Execution", cve: "CVE-2023-51713", platform: "Unix/Linux", reliability: 76, severity: "high" },
-              { id: "EXP-2024-089", name: "WordPress Plugin SQLi", cve: "CVE-2024-1234", platform: "PHP/MySQL", reliability: 92, severity: "medium" }
-            ].map((exp, i) => (
-              <div 
-                key={i} 
-                onClick={() => setSelectedExploit(exp.id)}
-                className={`bg-panel-bg rounded p-2.5 border transition-all cursor-pointer ${
-                  selectedExploit === exp.id ? "border-primary" : "border-border hover:border-primary/50"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-1">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-text-primary text-xs font-semibold truncate">{exp.name}</div>
-                    <div className="text-text-muted text-xs mt-0.5">{exp.cve}</div>
-                  </div>
-                  <Badge variant={exp.severity === "critical" ? "destructive" : "default"} className="h-4 text-xs ml-2">
-                    {exp.severity}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-xs text-text-secondary">{exp.platform}</span>
-                  <div className="flex items-center gap-1">
-                    <div className="h-1.5 w-16 bg-editor-active-line rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${exp.reliability > 90 ? "bg-green-500" : exp.reliability > 75 ? "bg-yellow-500" : "bg-orange-500"}`}
-                        style={{ width: `${exp.reliability}%` }}
-                      />
+          selectedExploit ? (
+            <ExploitFlow />
+          ) : (
+            <div className="p-3 space-y-2">
+              <Input placeholder="Search exploits (CVE, name, platform)..." className="h-7 text-xs mb-2" />
+              <div className="text-xs text-text-muted mb-2">AVAILABLE EXPLOITS (2,847)</div>
+              {[
+                { id: "EXP-2024-001", name: "Apache Struts2 RCE", cve: "CVE-2023-50164", platform: "Linux/Windows", reliability: 95, severity: "critical" },
+                { id: "EXP-2023-287", name: "Windows SMB Privilege Escalation", cve: "CVE-2023-23397", platform: "Windows", reliability: 89, severity: "high" },
+                { id: "EXP-2024-012", name: "Jenkins Script Console RCE", cve: "CVE-2024-23897", platform: "Java/Linux", reliability: 98, severity: "critical" },
+                { id: "EXP-2023-445", name: "ProFTPD Arbitrary Code Execution", cve: "CVE-2023-51713", platform: "Unix/Linux", reliability: 76, severity: "high" },
+                { id: "EXP-2024-089", name: "WordPress Plugin SQLi", cve: "CVE-2024-1234", platform: "PHP/MySQL", reliability: 92, severity: "medium" }
+              ].map((exp, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setSelectedExploit(exp.id)}
+                  className={`bg-panel-bg rounded p-2.5 border transition-all cursor-pointer ${
+                    selectedExploit === exp.id ? "border-primary" : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-text-primary text-xs font-semibold truncate">{exp.name}</div>
+                      <div className="text-text-muted text-xs mt-0.5">{exp.cve}</div>
                     </div>
-                    <span className="text-xs text-text-muted">{exp.reliability}%</span>
+                    <Badge variant={exp.severity === "critical" ? "destructive" : "default"} className="h-4 text-xs ml-2">
+                      {exp.severity}
+                    </Badge>
                   </div>
-                </div>
-                {selectedExploit === exp.id && (
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-xs text-text-secondary">{exp.platform}</span>
+                    <div className="flex items-center gap-1">
+                      <div className="h-1.5 w-16 bg-editor-active-line rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${exp.reliability > 90 ? "bg-green-500" : exp.reliability > 75 ? "bg-yellow-500" : "bg-orange-500"}`}
+                          style={{ width: `${exp.reliability}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-text-muted">{exp.reliability}%</span>
+                    </div>
+                  </div>
                   <div className="mt-2 pt-2 border-t border-border">
                     <button className="w-full h-6 bg-primary hover:bg-primary-hover text-primary-foreground rounded text-xs font-medium flex items-center justify-center gap-1">
                       <Play className="w-3 h-3" />
                       Execute Exploit
                     </button>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
         
         {activePanel === "payloads" && (
@@ -235,45 +239,7 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         )}
         
         {activePanel === "network" && (
-          <div className="p-3 space-y-2">
-            <div className="text-xs text-text-muted mb-2">NETWORK TOPOLOGY</div>
-            <div className="bg-editor-bg rounded p-3 border border-border">
-              <div className="space-y-3 text-xs font-mono">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span className="text-text-primary">192.168.1.0/24 (DMZ)</span>
-                </div>
-                <div className="ml-4 space-y-1.5">
-                  <div className="text-text-secondary">├─ 192.168.1.1 (Gateway/Firewall)</div>
-                  <div className="text-text-secondary">├─ 192.168.1.10 (Web Server)</div>
-                  <div className="text-text-secondary">└─ 192.168.1.25 (Mail Server)</div>
-                </div>
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                  <span className="text-text-primary">10.10.0.0/16 (Internal)</span>
-                </div>
-                <div className="ml-4 space-y-1.5">
-                  <div className="text-text-secondary">├─ 10.10.1.5 (Domain Controller)</div>
-                  <div className="text-text-secondary">├─ 10.10.2.10-50 (Workstations)</div>
-                  <div className="text-text-secondary">└─ 10.10.5.100 (Database Server)</div>
-                </div>
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-text-primary">172.16.0.0/24 (Dev Network)</span>
-                </div>
-                <div className="ml-4 space-y-1.5">
-                  <div className="text-red-500">├─ 172.16.0.5 (Jenkins - COMPROMISED)</div>
-                  <div className="text-text-secondary">└─ 172.16.0.20 (GitLab)</div>
-                </div>
-              </div>
-            </div>
-            <div className="text-xs text-text-muted mt-3 mb-2">ROUTING TABLE</div>
-            <div className="bg-panel-bg rounded p-2 border border-border text-xs font-mono space-y-1">
-              <div className="text-text-secondary">192.168.1.0/24 → Direct</div>
-              <div className="text-text-secondary">10.10.0.0/16 → via 192.168.1.25</div>
-              <div className="text-red-500">172.16.0.0/24 → via 10.10.1.5 (pivot)</div>
-            </div>
-          </div>
+          <NetworkGraph />
         )}
         
         {activePanel === "shells" && (
