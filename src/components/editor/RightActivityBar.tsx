@@ -15,9 +15,9 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
     { id: "network", icon: Network, label: "Network Mapper" },
     { id: "shells", icon: TerminalIcon, label: "Active Shells" },
     { id: "listeners", icon: Radio, label: "Listeners" },
-    { id: "loot", icon: Database, label: "Data Exfiltration" },
+    { id: "loot", icon: Database, label: "Credential Vault" },
     { id: "monitor", icon: Activity, label: "Live Monitoring" },
-    { id: "pivots", icon: Crosshair, label: "Pivot Points" },
+    { id: "pivots", icon: Crosshair, label: "Campaign Scheduler" },
   ];
 
   return (
