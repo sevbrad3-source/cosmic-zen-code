@@ -8,6 +8,10 @@ import LogStream from "./LogStream";
 import CredentialManager from "./CredentialManager";
 import ReportGenerator from "./ReportGenerator";
 import CampaignScheduler from "./CampaignScheduler";
+import CollaborationPanel from "./CollaborationPanel";
+import AttackTimeline from "./AttackTimeline";
+import RemediationAdvisor from "./RemediationAdvisor";
+import ThreatIntelligence from "./ThreatIntelligence";
 
 interface RightPanelProps {
   activePanel: string;
@@ -30,7 +34,11 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       listeners: "Listeners",
       loot: "Credential Vault",
       monitor: "Live Monitoring",
-      pivots: "Campaign Scheduler"
+      pivots: "Campaign Scheduler",
+      collab: "Team Collaboration",
+      timeline: "Attack Timeline",
+      remediation: "Remediation Advisor",
+      "threat-intel": "Threat Intelligence"
     };
     return titles[activePanel] || "Panel";
   };
@@ -320,6 +328,10 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "monitor" && <LogStream />}
         
         {activePanel === "pivots" && <CampaignScheduler />}
+        {activePanel === "collab" && <CollaborationPanel />}
+        {activePanel === "timeline" && <AttackTimeline />}
+        {activePanel === "remediation" && <RemediationAdvisor />}
+        {activePanel === "threat-intel" && <ThreatIntelligence />}
       </div>
     </div>
   );
