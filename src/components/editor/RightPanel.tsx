@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import NetworkGraph from "./NetworkGraph";
 import ExploitFlow from "./ExploitFlow";
+import LogStream from "./LogStream";
+import CredentialManager from "./CredentialManager";
+import ReportGenerator from "./ReportGenerator";
+import CampaignScheduler from "./CampaignScheduler";
 
 interface RightPanelProps {
   activePanel: string;
@@ -24,9 +28,9 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       network: "Network Mapper",
       shells: "Active Shells",
       listeners: "Listeners",
-      loot: "Data Exfiltration",
+      loot: "Credential Vault",
       monitor: "Live Monitoring",
-      pivots: "Pivot Points"
+      pivots: "Campaign Scheduler"
     };
     return titles[activePanel] || "Panel";
   };
@@ -311,120 +315,11 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
           </div>
         )}
         
-        {activePanel === "loot" && (
-          <div className="p-3 space-y-2">
-            <div className="text-xs text-text-muted mb-2">EXFILTRATED DATA (2.4 GB)</div>
-            {[
-              { name: "credentials.txt", size: "48 KB", source: "192.168.1.10", type: "passwords", date: "2m ago" },
-              { name: "customer_db.sql", size: "1.2 GB", source: "10.10.5.100", type: "database", date: "15m ago" },
-              { name: "ssh_keys.zip", size: "124 KB", source: "192.168.1.25", type: "keys", date: "32m ago" },
-              { name: "emails.mbox", size: "890 MB", source: "192.168.1.25", type: "emails", date: "1h ago" },
-              { name: "source_code.tar.gz", size: "256 MB", source: "172.16.0.20", type: "code", date: "2h ago" }
-            ].map((item, i) => (
-              <div key={i} className="bg-panel-bg rounded p-2.5 border border-border hover:border-primary transition-colors group">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-text-primary text-xs font-semibold truncate">{item.name}</div>
-                    <div className="text-text-muted text-xs mt-0.5">{item.source}</div>
-                  </div>
-                  <Badge variant="secondary" className="h-4 text-xs ml-2">{item.type}</Badge>
-                </div>
-                <div className="flex items-center justify-between mt-1.5 text-xs">
-                  <span className="text-text-secondary">{item.size}</span>
-                  <span className="text-text-muted">{item.date}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {activePanel === "loot" && <CredentialManager />}
         
-        {activePanel === "monitor" && (
-          <div className="p-3 space-y-3">
-            <div className="bg-panel-bg rounded p-2.5 border border-border">
-              <div className="text-xs text-text-muted mb-2">SYSTEM LOAD</div>
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-text-secondary">CPU</span>
-                    <span className="text-text-primary">47%</span>
-                  </div>
-                  <div className="h-1.5 bg-editor-active-line rounded-full overflow-hidden">
-                    <div className="h-full bg-primary w-[47%]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-text-secondary">Memory</span>
-                    <span className="text-text-primary">6.2 / 16 GB</span>
-                  </div>
-                  <div className="h-1.5 bg-editor-active-line rounded-full overflow-hidden">
-                    <div className="h-full bg-yellow-500 w-[39%]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-text-secondary">Network</span>
-                    <span className="text-text-primary">124 Mbps ↓ / 89 Mbps ↑</span>
-                  </div>
-                  <div className="h-1.5 bg-editor-active-line rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 w-[62%]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="text-xs text-text-muted mb-2">LIVE ACTIVITY LOG</div>
-            <div className="bg-editor-bg rounded p-2 border border-border text-xs font-mono space-y-1 max-h-64 overflow-y-auto scrollbar-thin">
-              {[
-                { time: "14:32:47", level: "INFO", msg: "Port scan completed on 192.168.1.0/24" },
-                { time: "14:32:51", level: "WARN", msg: "Weak credentials detected on 192.168.1.10:22" },
-                { time: "14:33:02", level: "SUCCESS", msg: "Shell opened on 192.168.1.10 (www-data)" },
-                { time: "14:33:15", level: "INFO", msg: "Enumerating local users..." },
-                { time: "14:33:28", level: "ERROR", msg: "Privilege escalation attempt failed" },
-                { time: "14:33:45", level: "SUCCESS", msg: "Credentials harvested: 47 users" },
-                { time: "14:34:01", level: "WARN", msg: "IDS alert detected on 10.10.1.5" },
-                { time: "14:34:12", level: "INFO", msg: "Pivoting through 192.168.1.25..." }
-              ].map((log, i) => (
-                <div key={i} className={`${
-                  log.level === "SUCCESS" ? "text-green-500" :
-                  log.level === "ERROR" ? "text-red-500" :
-                  log.level === "WARN" ? "text-yellow-500" :
-                  "text-text-secondary"
-                }`}>
-                  [{log.time}] {log.level}: {log.msg}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {activePanel === "monitor" && <LogStream />}
         
-        {activePanel === "pivots" && (
-          <div className="p-3 space-y-2">
-            <div className="text-xs text-text-muted mb-2">PIVOT CHAINS (3)</div>
-            {[
-              { name: "DMZ to Internal", hops: ["192.168.1.10", "192.168.1.25", "10.10.1.5"], status: "active" },
-              { name: "Internal to Dev", hops: ["10.10.1.5", "10.10.5.100", "172.16.0.5"], status: "active" },
-              { name: "Dev to Cloud", hops: ["172.16.0.5", "172.16.0.1", "203.0.113.45"], status: "establishing" }
-            ].map((pivot, i) => (
-              <div key={i} className="bg-panel-bg rounded p-2.5 border border-border">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="text-text-primary text-xs font-semibold">{pivot.name}</div>
-                    <div className="text-text-muted text-xs mt-0.5">{pivot.hops.length} hops</div>
-                  </div>
-                  <div className={`w-1.5 h-1.5 rounded-full ${pivot.status === "active" ? "bg-green-500" : "bg-yellow-500 animate-pulse"}`} />
-                </div>
-                <div className="space-y-1 text-xs font-mono">
-                  {pivot.hops.map((hop, j) => (
-                    <div key={j} className="text-text-secondary flex items-center gap-1">
-                      {j > 0 && <span className="text-text-muted">└→</span>}
-                      <span className={j === 0 ? "ml-0" : "ml-3"}>{hop}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {activePanel === "pivots" && <CampaignScheduler />}
       </div>
     </div>
   );
