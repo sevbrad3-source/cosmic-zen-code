@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield } from "lucide-react";
+import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -22,6 +22,9 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
     { id: "timeline", icon: Clock, label: "Attack Timeline" },
     { id: "remediation", icon: Wrench, label: "Remediation Advisor" },
     { id: "threat-intel", icon: Shield, label: "Threat Intelligence" },
+    { id: "report-scheduler", icon: Calendar, label: "Report Scheduler" },
+    { id: "compliance", icon: FileCheck, label: "Compliance Checker" },
+    { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
   ];
 
   return (

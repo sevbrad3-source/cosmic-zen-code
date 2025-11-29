@@ -12,6 +12,9 @@ import CollaborationPanel from "./CollaborationPanel";
 import AttackTimeline from "./AttackTimeline";
 import RemediationAdvisor from "./RemediationAdvisor";
 import ThreatIntelligence from "./ThreatIntelligence";
+import ReportScheduler from "./ReportScheduler";
+import ComplianceChecker from "./ComplianceChecker";
+import AISecurityAdvisor from "./AISecurityAdvisor";
 
 interface RightPanelProps {
   activePanel: string;
@@ -38,7 +41,10 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       collab: "Team Collaboration",
       timeline: "Attack Timeline",
       remediation: "Remediation Advisor",
-      "threat-intel": "Threat Intelligence"
+      "threat-intel": "Threat Intelligence",
+      "report-scheduler": "Report Scheduler",
+      compliance: "Compliance Checker",
+      "ai-advisor": "AI Security Advisor"
     };
     return titles[activePanel] || "Panel";
   };
@@ -332,6 +338,9 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "timeline" && <AttackTimeline />}
         {activePanel === "remediation" && <RemediationAdvisor />}
         {activePanel === "threat-intel" && <ThreatIntelligence />}
+        {activePanel === "report-scheduler" && <ReportScheduler />}
+        {activePanel === "compliance" && <ComplianceChecker />}
+        {activePanel === "ai-advisor" && <AISecurityAdvisor />}
       </div>
     </div>
   );
