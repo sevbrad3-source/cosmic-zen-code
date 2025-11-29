@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AIRecommendation {
   id: string;
@@ -19,6 +21,8 @@ interface AIRecommendation {
 const AISecurityAdvisor = () => {
   const [query, setQuery] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
+  const [aiResponse, setAiResponse] = useState<string>("");
+  const { toast } = useToast();
 
   const [recommendations] = useState<AIRecommendation[]>([
     {
@@ -98,9 +102,44 @@ const AISecurityAdvisor = () => {
     }
   ]);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!query.trim() && recommendations.length === 0) {
+      toast({
+        title: "Input Required",
+        description: "Please enter a question or wait for findings to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setAnalyzing(true);
-    setTimeout(() => setAnalyzing(false), 2000);
+    try {
+      const { data, error } = await supabase.functions.invoke("security-ai-advisor", {
+        body: { 
+          query: query || undefined,
+          findings: recommendations 
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.analysis) {
+        setAiResponse(data.analysis);
+        toast({
+          title: "Analysis Complete",
+          description: "AI recommendations have been generated.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error calling AI advisor:", error);
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Failed to get AI recommendations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const getCategoryIcon = (category: string) => {
@@ -160,6 +199,18 @@ const AISecurityAdvisor = () => {
           {analyzing ? "Analyzing..." : "Get AI Recommendations"}
         </Button>
       </Card>
+
+      {aiResponse && (
+        <Card className="p-4 bg-panel-bg border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <Brain className="w-4 h-4 text-activitybar-active" />
+            <h4 className="text-sm font-semibold text-text-primary">AI Analysis</h4>
+          </div>
+          <div className="text-xs text-text-primary whitespace-pre-wrap leading-relaxed">
+            {aiResponse}
+          </div>
+        </Card>
+      )}
 
       <div className="space-y-3">
         <h4 className="text-xs font-semibold text-text-secondary">Strategic Recommendations</h4>

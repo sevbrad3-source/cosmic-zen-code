@@ -15,6 +15,7 @@ import ThreatIntelligence from "./ThreatIntelligence";
 import ReportScheduler from "./ReportScheduler";
 import ComplianceChecker from "./ComplianceChecker";
 import AISecurityAdvisor from "./AISecurityAdvisor";
+import VulnerabilityPrioritizer from "./VulnerabilityPrioritizer";
 
 interface RightPanelProps {
   activePanel: string;
@@ -44,7 +45,8 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       "threat-intel": "Threat Intelligence",
       "report-scheduler": "Report Scheduler",
       compliance: "Compliance Checker",
-      "ai-advisor": "AI Security Advisor"
+      "ai-advisor": "AI Security Advisor",
+      "vuln-prioritizer": "Vulnerability Prioritizer"
     };
     return titles[activePanel] || "Panel";
   };
@@ -341,6 +343,7 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "report-scheduler" && <ReportScheduler />}
         {activePanel === "compliance" && <ComplianceChecker />}
         {activePanel === "ai-advisor" && <AISecurityAdvisor />}
+        {activePanel === "vuln-prioritizer" && <VulnerabilityPrioritizer />}
       </div>
     </div>
   );
