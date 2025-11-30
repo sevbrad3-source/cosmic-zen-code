@@ -1,21 +1,23 @@
 import { Send, X, Check, AlertCircle, Loader2, Copy, Play, Square } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import NetworkGraph from "./NetworkGraph";
-import ExploitFlow from "./ExploitFlow";
-import LogStream from "./LogStream";
-import CredentialManager from "./CredentialManager";
-import ReportGenerator from "./ReportGenerator";
-import CampaignScheduler from "./CampaignScheduler";
-import CollaborationPanel from "./CollaborationPanel";
-import AttackTimeline from "./AttackTimeline";
-import RemediationAdvisor from "./RemediationAdvisor";
-import ThreatIntelligence from "./ThreatIntelligence";
-import ReportScheduler from "./ReportScheduler";
-import ComplianceChecker from "./ComplianceChecker";
-import AISecurityAdvisor from "./AISecurityAdvisor";
-import VulnerabilityPrioritizer from "./VulnerabilityPrioritizer";
+import { useState, lazy, Suspense } from "react";
+
+// Lazy load panel components to prevent circular dependencies
+const NetworkGraph = lazy(() => import("./NetworkGraph"));
+const ExploitFlow = lazy(() => import("./ExploitFlow"));
+const LogStream = lazy(() => import("./LogStream"));
+const CredentialManager = lazy(() => import("./CredentialManager"));
+const ReportGenerator = lazy(() => import("./ReportGenerator"));
+const CampaignScheduler = lazy(() => import("./CampaignScheduler"));
+const CollaborationPanel = lazy(() => import("./CollaborationPanel"));
+const AttackTimeline = lazy(() => import("./AttackTimeline"));
+const RemediationAdvisor = lazy(() => import("./RemediationAdvisor"));
+const ThreatIntelligence = lazy(() => import("./ThreatIntelligence"));
+const ReportScheduler = lazy(() => import("./ReportScheduler"));
+const ComplianceChecker = lazy(() => import("./ComplianceChecker"));
+const AISecurityAdvisor = lazy(() => import("./AISecurityAdvisor"));
+const VulnerabilityPrioritizer = lazy(() => import("./VulnerabilityPrioritizer"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -66,6 +68,7 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       </div>
       
       <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <Suspense fallback={<div className="p-4 text-xs text-text-secondary">Loading...</div>}>
         {activePanel === "targets" && (
           <div className="p-3 space-y-2">
             <div className="text-xs text-text-muted mb-2">ACTIVE TARGETS (12)</div>
@@ -344,6 +347,7 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "compliance" && <ComplianceChecker />}
         {activePanel === "ai-advisor" && <AISecurityAdvisor />}
         {activePanel === "vuln-prioritizer" && <VulnerabilityPrioritizer />}
+        </Suspense>
       </div>
     </div>
   );
