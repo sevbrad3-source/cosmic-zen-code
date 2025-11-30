@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain, TrendingUp, Package, Syringe } from "lucide-react";
+import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Globe } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -12,6 +12,11 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
     { id: "listeners", icon: Activity, label: "Listeners" },
     { id: "payloads", icon: Package, label: "Payload Builder" },
     { id: "injection", icon: Syringe, label: "Process Injection" },
+    { id: "covert", icon: Wifi, label: "Covert Channels" },
+    { id: "lateral", icon: Crosshair, label: "Lateral Movement" },
+    { id: "postexploit", icon: FolderOpen, label: "Post-Exploitation" },
+    { id: "rowhammer", icon: Cpu, label: "Rowhammer Testing" },
+    { id: "geomap", icon: Globe, label: "Geographic Map" },
     { id: "targets", icon: Target, label: "Target Enumeration" },
     { id: "exploits", icon: Zap, label: "Exploit Database" },
     { id: "vulns", icon: ShieldAlert, label: "Vulnerability Scanner" },

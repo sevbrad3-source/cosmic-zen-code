@@ -22,6 +22,11 @@ const BeaconManager = lazy(() => import("./BeaconManager"));
 const ListenerPanel = lazy(() => import("./ListenerPanel"));
 const PayloadBuilder = lazy(() => import("./PayloadBuilder"));
 const ProcessInjectionPanel = lazy(() => import("./ProcessInjectionPanel"));
+const CovertChannelsPanel = lazy(() => import("./CovertChannelsPanel"));
+const LateralMovementPanel = lazy(() => import("./LateralMovementPanel"));
+const PostExploitationPanel = lazy(() => import("./PostExploitationPanel"));
+const RowhammerPanel = lazy(() => import("./RowhammerPanel"));
+const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -355,6 +360,11 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "listeners" && <ListenerPanel />}
         {activePanel === "payloads" && <PayloadBuilder />}
         {activePanel === "injection" && <ProcessInjectionPanel />}
+        {activePanel === "covert" && <CovertChannelsPanel />}
+        {activePanel === "lateral" && <LateralMovementPanel />}
+        {activePanel === "postexploit" && <PostExploitationPanel />}
+        {activePanel === "rowhammer" && <RowhammerPanel />}
+        {activePanel === "geomap" && <MapboxVisualization />}
         </Suspense>
       </div>
     </div>

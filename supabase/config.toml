@@ -1,1 +1,7 @@
 project_id = "uxinkcxkhpeikkfjvofb"
+
+[functions.security-ai-advisor]
+verify_jwt = false
+
+[functions.get-mapbox-token]
+verify_jwt = false
