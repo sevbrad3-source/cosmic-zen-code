@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain, TrendingUp } from "lucide-react";
+import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain, TrendingUp, Package, Syringe } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -8,13 +8,15 @@ interface RightActivityBarProps {
 
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
   const items = [
+    { id: "beacons", icon: Radio, label: "Beacon Manager" },
+    { id: "listeners", icon: Activity, label: "Listeners" },
+    { id: "payloads", icon: Package, label: "Payload Builder" },
+    { id: "injection", icon: Syringe, label: "Process Injection" },
     { id: "targets", icon: Target, label: "Target Enumeration" },
     { id: "exploits", icon: Zap, label: "Exploit Database" },
-    { id: "payloads", icon: Bug, label: "Payload Generator" },
     { id: "vulns", icon: ShieldAlert, label: "Vulnerability Scanner" },
     { id: "network", icon: Network, label: "Network Mapper" },
     { id: "shells", icon: TerminalIcon, label: "Active Shells" },
-    { id: "listeners", icon: Radio, label: "Listeners" },
     { id: "loot", icon: Database, label: "Credential Vault" },
     { id: "monitor", icon: Activity, label: "Live Monitoring" },
     { id: "pivots", icon: Crosshair, label: "Campaign Scheduler" },

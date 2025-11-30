@@ -18,6 +18,10 @@ const ReportScheduler = lazy(() => import("./ReportScheduler"));
 const ComplianceChecker = lazy(() => import("./ComplianceChecker"));
 const AISecurityAdvisor = lazy(() => import("./AISecurityAdvisor"));
 const VulnerabilityPrioritizer = lazy(() => import("./VulnerabilityPrioritizer"));
+const BeaconManager = lazy(() => import("./BeaconManager"));
+const ListenerPanel = lazy(() => import("./ListenerPanel"));
+const PayloadBuilder = lazy(() => import("./PayloadBuilder"));
+const ProcessInjectionPanel = lazy(() => import("./ProcessInjectionPanel"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -347,6 +351,10 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "compliance" && <ComplianceChecker />}
         {activePanel === "ai-advisor" && <AISecurityAdvisor />}
         {activePanel === "vuln-prioritizer" && <VulnerabilityPrioritizer />}
+        {activePanel === "beacons" && <BeaconManager />}
+        {activePanel === "listeners" && <ListenerPanel />}
+        {activePanel === "payloads" && <PayloadBuilder />}
+        {activePanel === "injection" && <ProcessInjectionPanel />}
         </Suspense>
       </div>
     </div>
