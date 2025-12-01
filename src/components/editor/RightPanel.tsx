@@ -27,6 +27,9 @@ const LateralMovementPanel = lazy(() => import("./LateralMovementPanel"));
 const PostExploitationPanel = lazy(() => import("./PostExploitationPanel"));
 const RowhammerPanel = lazy(() => import("./RowhammerPanel"));
 const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
+const PhysicalSecurityPanel = lazy(() => import("./PhysicalSecurityPanel"));
+const MitreAttackPanel = lazy(() => import("./MitreAttackPanel"));
+const C2FrameworkPanel = lazy(() => import("./C2FrameworkPanel"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -57,7 +60,17 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       "report-scheduler": "Report Scheduler",
       compliance: "Compliance Checker",
       "ai-advisor": "AI Security Advisor",
-      "vuln-prioritizer": "Vulnerability Prioritizer"
+      "vuln-prioritizer": "Vulnerability Prioritizer",
+      beacons: "Beacon Manager",
+      injection: "Process Injection",
+      covert: "Covert Channels",
+      lateral: "Lateral Movement",
+      postexploit: "Post-Exploitation",
+      "physical-security": "Physical Security",
+      "mitre-attack": "MITRE ATT&CK",
+      "c2-framework": "C2 Framework",
+      rowhammer: "Rowhammer Testing",
+      geomap: "Geographic Map"
     };
     return titles[activePanel] || "Panel";
   };

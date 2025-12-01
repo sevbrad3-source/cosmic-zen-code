@@ -7,32 +7,25 @@ interface RightActivityBarProps {
 }
 
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
+  // Right drawer - Analysis & Advisory tools
   const items = [
+    { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
+    { id: "threat-intel", icon: Shield, label: "Threat Intelligence" },
+    { id: "vuln-prioritizer", icon: TrendingUp, label: "Vulnerability Prioritizer" },
+    { id: "compliance", icon: FileCheck, label: "Compliance Checker" },
+    { id: "remediation", icon: Wrench, label: "Remediation Advisor" },
+    { id: "mitre-attack", icon: Target, label: "MITRE ATT&CK" },
+    { id: "c2-framework", icon: Radio, label: "C2 Framework" },
     { id: "beacons", icon: Radio, label: "Beacon Manager" },
-    { id: "listeners", icon: Activity, label: "Listeners" },
     { id: "payloads", icon: Package, label: "Payload Builder" },
     { id: "injection", icon: Syringe, label: "Process Injection" },
     { id: "covert", icon: Wifi, label: "Covert Channels" },
     { id: "lateral", icon: Crosshair, label: "Lateral Movement" },
     { id: "postexploit", icon: FolderOpen, label: "Post-Exploitation" },
+    { id: "physical-security", icon: ShieldAlert, label: "Physical Security" },
     { id: "rowhammer", icon: Cpu, label: "Rowhammer Testing" },
-    { id: "geomap", icon: Globe, label: "Geographic Map" },
-    { id: "targets", icon: Target, label: "Target Enumeration" },
-    { id: "exploits", icon: Zap, label: "Exploit Database" },
-    { id: "vulns", icon: ShieldAlert, label: "Vulnerability Scanner" },
-    { id: "network", icon: Network, label: "Network Mapper" },
-    { id: "shells", icon: TerminalIcon, label: "Active Shells" },
-    { id: "loot", icon: Database, label: "Credential Vault" },
-    { id: "monitor", icon: Activity, label: "Live Monitoring" },
-    { id: "pivots", icon: Crosshair, label: "Campaign Scheduler" },
     { id: "collab", icon: Users, label: "Team Collaboration" },
-    { id: "timeline", icon: Clock, label: "Attack Timeline" },
-    { id: "remediation", icon: Wrench, label: "Remediation Advisor" },
-    { id: "threat-intel", icon: Shield, label: "Threat Intelligence" },
     { id: "report-scheduler", icon: Calendar, label: "Report Scheduler" },
-    { id: "compliance", icon: FileCheck, label: "Compliance Checker" },
-    { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
-    { id: "vuln-prioritizer", icon: TrendingUp, label: "Vulnerability Prioritizer" },
   ];
 
   return (

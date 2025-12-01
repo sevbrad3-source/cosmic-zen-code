@@ -4,7 +4,6 @@ import ActivityBar from "@/components/editor/ActivityBar";
 import Sidebar from "@/components/editor/Sidebar";
 import EditorArea from "@/components/editor/EditorArea";
 import StatusBar from "@/components/editor/StatusBar";
-import Terminal from "@/components/editor/Terminal";
 import RightActivityBar from "@/components/editor/RightActivityBar";
 import RightPanel from "@/components/editor/RightPanel";
 import { ThemeName } from "@/lib/themes";
@@ -12,6 +11,8 @@ import { ThemeName } from "@/lib/themes";
 const Index = () => {
   const [activeView, setActiveView] = useState("explorer");
   const [activeRightPanel, setActiveRightPanel] = useState("");
+  const [activeBottomPanel, setActiveBottomPanel] = useState("terminal");
+  const [mainContent, setMainContent] = useState("editor");
   const [currentTheme, setCurrentTheme] = useState<ThemeName>("granite");
 
   useEffect(() => {
@@ -23,13 +24,21 @@ const Index = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
-      <TitleBar currentTheme={currentTheme} onThemeChange={setCurrentTheme} />
+      <TitleBar 
+        currentTheme={currentTheme} 
+        onThemeChange={setCurrentTheme}
+        mainContent={mainContent}
+        onMainContentChange={setMainContent}
+      />
       <div className="flex-1 flex overflow-hidden">
         <ActivityBar activeView={activeView} onViewChange={setActiveView} />
         <Sidebar activeView={activeView} />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <EditorArea />
-          <Terminal />
+          <EditorArea 
+            activeContent={mainContent}
+            onBottomPanelChange={setActiveBottomPanel}
+            activeBottomPanel={activeBottomPanel}
+          />
         </div>
         <RightPanel activePanel={activeRightPanel} onClose={() => setActiveRightPanel("")} />
         <RightActivityBar activePanel={activeRightPanel} onPanelChange={setActiveRightPanel} />
