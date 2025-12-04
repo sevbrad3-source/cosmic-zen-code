@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Network, Terminal as TerminalIcon, Radio, Bug, Database, Activity, Crosshair, Users, Clock, Wrench, Shield, Calendar, FileCheck, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Globe } from "lucide-react";
+import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -7,13 +7,9 @@ interface RightActivityBarProps {
 }
 
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
-  // Right drawer - Analysis & Advisory tools
+  // Right drawer - RED TEAM offensive tools
   const items = [
     { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
-    { id: "threat-intel", icon: Shield, label: "Threat Intelligence" },
-    { id: "vuln-prioritizer", icon: TrendingUp, label: "Vulnerability Prioritizer" },
-    { id: "compliance", icon: FileCheck, label: "Compliance Checker" },
-    { id: "remediation", icon: Wrench, label: "Remediation Advisor" },
     { id: "mitre-attack", icon: Target, label: "MITRE ATT&CK" },
     { id: "c2-framework", icon: Radio, label: "C2 Framework" },
     { id: "beacons", icon: Radio, label: "Beacon Manager" },
@@ -24,31 +20,35 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
     { id: "postexploit", icon: FolderOpen, label: "Post-Exploitation" },
     { id: "physical-security", icon: ShieldAlert, label: "Physical Security" },
     { id: "rowhammer", icon: Cpu, label: "Rowhammer Testing" },
+    { id: "vuln-prioritizer", icon: TrendingUp, label: "Vulnerability Prioritizer" },
     { id: "collab", icon: Users, label: "Team Collaboration" },
     { id: "report-scheduler", icon: Calendar, label: "Report Scheduler" },
   ];
 
   return (
-    <div className="w-12 bg-activitybar-bg border-l border-border flex flex-col items-center py-2 gap-1">
+    <div className="w-12 bg-[hsl(0,100%,8%)] border-l border-[hsl(0,100%,20%)] flex flex-col items-center py-2 gap-1">
+      <div className="w-8 h-8 mb-2 flex items-center justify-center rounded bg-[hsl(0,100%,25%)]">
+        <Skull className="w-5 h-5 text-[hsl(0,100%,70%)]" />
+      </div>
       <TooltipProvider delayDuration={300}>
         {items.map((item) => (
           <Tooltip key={item.id}>
             <TooltipTrigger asChild>
               <button
                 onClick={() => onPanelChange(item.id === activePanel ? "" : item.id)}
-                className={`w-12 h-12 flex items-center justify-center transition-colors relative group ${
+                className={`w-12 h-10 flex items-center justify-center transition-colors relative group ${
                   activePanel === item.id
-                    ? "text-foreground"
-                    : "text-text-secondary hover:text-foreground"
+                    ? "text-[hsl(0,100%,70%)] bg-[hsl(0,100%,15%)]"
+                    : "text-[hsl(0,60%,50%)] hover:text-[hsl(0,100%,70%)] hover:bg-[hsl(0,100%,12%)]"
                 }`}
               >
-                <item.icon className="w-6 h-6" />
+                <item.icon className="w-5 h-5" />
                 {activePanel === item.id && (
-                  <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-activitybar-active" />
+                  <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[hsl(0,100%,50%)]" />
                 )}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="left" className="bg-panel-bg border-border text-text-primary">
+            <TooltipContent side="left" className="bg-[hsl(0,100%,12%)] border-[hsl(0,100%,25%)] text-[hsl(0,100%,85%)]">
               {item.label}
             </TooltipContent>
           </Tooltip>
