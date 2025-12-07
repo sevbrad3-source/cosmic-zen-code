@@ -9,6 +9,8 @@ const IOCManagerPanel = lazy(() => import("./IOCManagerPanel"));
 const IncidentResponsePanel = lazy(() => import("./IncidentResponsePanel"));
 const SecurityControlsPanel = lazy(() => import("./SecurityControlsPanel"));
 const PurpleTeamPanel = lazy(() => import("./PurpleTeamPanel"));
+const ThreatIntelFeedsPanel = lazy(() => import("./ThreatIntelFeedsPanel"));
+const ScenarioPlaybookPanel = lazy(() => import("./ScenarioPlaybookPanel"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -40,6 +42,10 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <IncidentResponsePanel />;
       case "security-controls":
         return <SecurityControlsPanel />;
+      case "threat-intel":
+        return <ThreatIntelFeedsPanel />;
+      case "playbooks":
+        return <ScenarioPlaybookPanel />;
       case "purple-team":
         return <PurpleTeamPanel />;
       default:
