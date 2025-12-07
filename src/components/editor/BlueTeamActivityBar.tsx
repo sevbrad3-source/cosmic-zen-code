@@ -12,14 +12,15 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "detection-eng", icon: Radar, label: "Detection Engineering" },
     { id: "siem", icon: Activity, label: "SIEM & Analytics" },
     { id: "ioc-manager", icon: Database, label: "IOC Management" },
+    { id: "threat-intel", icon: Eye, label: "Threat Intel Feeds" },
     { id: "forensics", icon: Fingerprint, label: "Digital Forensics" },
     { id: "log-analysis", icon: FileSearch, label: "Log Analysis" },
     { id: "incident-response", icon: AlertTriangle, label: "Incident Response" },
     { id: "security-controls", icon: Lock, label: "Security Controls" },
     { id: "alerts", icon: Bell, label: "Alert Center" },
     { id: "purple-team", icon: ShieldCheck, label: "Purple Team" },
+    { id: "playbooks", icon: FileBarChart, label: "Scenario Playbooks" },
     { id: "vuln-management", icon: Bug, label: "Vulnerability Mgmt" },
-    { id: "compliance-audit", icon: FileBarChart, label: "Compliance Audit" },
   ];
 
   return (

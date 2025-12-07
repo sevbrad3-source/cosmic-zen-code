@@ -24,6 +24,7 @@ const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChang
     { id: "timeline", label: "Attack Timeline", icon: Clock },
     { id: "chain-builder", label: "Attack Chain", icon: Link },
     { id: "reports", label: "Red Team Report", icon: FileBarChart },
+    { id: "collaboration", label: "Team Comms", icon: Network },
   ];
 
   const specializedTools = [
