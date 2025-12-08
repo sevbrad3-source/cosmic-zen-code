@@ -1,4 +1,4 @@
-import { X, ChevronUp, Plus, ChevronDown } from "lucide-react";
+import { X, ChevronUp, Plus, ChevronDown, Terminal as TerminalIcon, Activity, Radio } from "lucide-react";
 import { useState, lazy, Suspense } from "react";
 
 const NetworkGraph = lazy(() => import("./NetworkGraph"));
@@ -6,6 +6,9 @@ const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
 const ExploitFlow = lazy(() => import("./ExploitFlow"));
 const AttackTimeline = lazy(() => import("./AttackTimeline"));
 const ReportGenerator = lazy(() => import("./ReportGenerator"));
+const AttackChainBuilder = lazy(() => import("./AttackChainBuilder"));
+const RedTeamReportGenerator = lazy(() => import("./RedTeamReportGenerator"));
+const LiveCollaborationPanel = lazy(() => import("./LiveCollaborationPanel"));
 const Terminal = lazy(() => import("./Terminal"));
 const LogStream = lazy(() => import("./LogStream"));
 const ListenerPanel = lazy(() => import("./ListenerPanel"));
@@ -19,43 +22,64 @@ interface Tab {
 const mockTabs: Tab[] = [
   {
     id: "1",
-    name: "App.tsx",
-    content: `import React from 'react';
-import { Header } from './components/Header';
-import { Sidebar } from './components/Sidebar';
-import { MainContent } from './components/MainContent';
+    name: "exploit.py",
+    content: `#!/usr/bin/env python3
+# Red Team Simulation Framework
+# EDUCATIONAL PURPOSE ONLY
 
-const App: React.FC = () => {
-  return (
-    <div className="app-container">
-      <Header />
-      <div className="content-wrapper">
-        <Sidebar />
-        <MainContent />
-      </div>
-    </div>
-  );
-};
+import socket
+import subprocess
+from typing import Optional
 
-export default App;`,
+class ExploitSimulator:
+    """Simulated exploit for training purposes"""
+    
+    def __init__(self, target: str, port: int):
+        self.target = target
+        self.port = port
+        self.connected = False
+    
+    def simulate_connection(self) -> bool:
+        """Mock connection - no actual network activity"""
+        print(f"[SIM] Connecting to {self.target}:{self.port}")
+        self.connected = True
+        return True
+    
+    def simulate_payload(self, payload: bytes) -> Optional[str]:
+        """Mock payload delivery"""
+        if not self.connected:
+            return None
+        print(f"[SIM] Payload size: {len(payload)} bytes")
+        return "SIMULATED_RESPONSE"
+
+if __name__ == "__main__":
+    # Training mode only
+    sim = ExploitSimulator("192.168.1.100", 445)
+    sim.simulate_connection()`,
   },
   {
     id: "2",
-    name: "index.tsx",
-    content: `import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './styles.css';
+    name: "recon.sh",
+    content: `#!/bin/bash
+# Reconnaissance Script - Training Environment
+# All targets are simulated
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+echo "[*] Starting simulated reconnaissance..."
+echo "[*] Target: \$TARGET_RANGE"
 
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);`,
+# Mock nmap scan
+echo "[+] Port scan simulation..."
+echo "    22/tcp   open  ssh"
+echo "    80/tcp   open  http"
+echo "    443/tcp  open  https"
+echo "    3306/tcp open  mysql"
+
+# Mock enumeration
+echo "[+] Service enumeration..."
+echo "    SSH-2.0-OpenSSH_8.2p1"
+echo "    Apache/2.4.41 (Ubuntu)"
+
+echo "[✓] Recon complete (simulated data)"`,
   },
 ];
 
@@ -68,7 +92,7 @@ interface EditorAreaProps {
 const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: EditorAreaProps) => {
   const [tabs] = useState<Tab[]>(mockTabs);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
-  const [bottomPanelHeight] = useState(200);
+  const [bottomPanelHeight] = useState(220);
 
   const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content || "";
 
@@ -76,7 +100,7 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
     let highlighted = line;
     
     highlighted = highlighted.replace(
-      /\b(import|from|const|let|var|function|return|export|default|class|interface|type|enum|as|extends|implements)\b/g,
+      /\b(import|from|const|let|var|function|return|export|default|class|interface|type|enum|as|extends|implements|def|if|else|elif|for|while|try|except|finally|with|async|await|echo|fi|then|do|done)\b/g,
       '<span class="text-syntax-keyword">$1</span>'
     );
     
@@ -86,7 +110,7 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
     );
     
     highlighted = highlighted.replace(
-      /(\/\/.*$)/g,
+      /(#.*$)/g,
       '<span class="text-syntax-comment">$1</span>'
     );
     
@@ -120,6 +144,12 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
         return <AttackTimeline />;
       case "reports":
         return <ReportGenerator />;
+      case "attack-chain":
+        return <AttackChainBuilder />;
+      case "red-report":
+        return <RedTeamReportGenerator />;
+      case "team-comms":
+        return <LiveCollaborationPanel />;
       default:
         return (
           <>
@@ -165,7 +195,6 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
   };
 
   const renderBottomPanel = () => {
-    if (!activeBottomPanel) return null;
     switch (activeBottomPanel) {
       case "terminal":
         return <Terminal />;
@@ -178,6 +207,12 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
     }
   };
 
+  const bottomTabs = [
+    { id: "terminal", label: "Terminal", icon: TerminalIcon },
+    { id: "logs", label: "Logs", icon: Activity },
+    { id: "listeners", label: "Listeners", icon: Radio },
+  ];
+
   return (
     <div className="flex-1 flex flex-col bg-editor-bg overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -185,19 +220,43 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
           {renderMainContent()}
         </Suspense>
       </div>
+      
+      {/* Consolidated Bottom Panel */}
       {activeBottomPanel && (
         <div className="border-t border-border bg-panel-bg flex flex-col" style={{ height: `${bottomPanelHeight}px` }}>
-          <div className="h-9 flex items-center justify-between px-2 border-b border-panel-border">
+          <div className="h-9 flex items-center justify-between px-2 border-b border-panel-border bg-statusbar-bg">
             <div className="flex items-center gap-1">
-              <button onClick={() => onBottomPanelChange("terminal")} className={`px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors ${activeBottomPanel === "terminal" ? "text-text-primary border-b-2 border-primary" : "text-text-secondary"}`}>Terminal</button>
-              <button onClick={() => onBottomPanelChange("logs")} className={`px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors ${activeBottomPanel === "logs" ? "text-text-primary border-b-2 border-primary" : "text-text-secondary"}`}>Logs</button>
-              <button onClick={() => onBottomPanelChange("listeners")} className={`px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors ${activeBottomPanel === "listeners" ? "text-text-primary border-b-2 border-primary" : "text-text-secondary"}`}>Listeners</button>
+              {bottomTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onBottomPanelChange(tab.id)}
+                  className={`px-2 py-1 text-xs flex items-center gap-1.5 hover:bg-sidebar-hover rounded transition-colors ${
+                    activeBottomPanel === tab.id 
+                      ? "text-text-primary border-b-2 border-primary" 
+                      : "text-text-secondary"
+                  }`}
+                >
+                  <tab.icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              ))}
             </div>
             <div className="flex items-center gap-1">
-              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"><Plus className="w-4 h-4" /></button>
-              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"><ChevronDown className="w-4 h-4" /></button>
-              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"><ChevronUp className="w-4 h-4" /></button>
-              <button onClick={() => onBottomPanelChange("")} className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"><X className="w-4 h-4" /></button>
+              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
+                <ChevronUp className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => onBottomPanelChange("")}
+                className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden">

@@ -122,43 +122,7 @@ const Terminal = () => {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="border-t border-border bg-panel-bg flex flex-col"
-      style={{ height: `${height}px` }}
-    >
-      <div className="h-9 flex items-center justify-between px-2 border-b border-panel-border">
-        <div className="flex items-center gap-1">
-          <button className="px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors text-text-primary border-b-2 border-primary">
-            Terminal
-          </button>
-          <button className="px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors text-text-secondary">
-            Problems
-          </button>
-          <button className="px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors text-text-secondary">
-            Output
-          </button>
-          <button className="px-2 py-1 text-xs hover:bg-sidebar-hover rounded transition-colors text-text-secondary">
-            Debug Console
-          </button>
-        </div>
-        <div className="flex items-center gap-1">
-          <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
-            <Plus className="w-4 h-4" />
-          </button>
-          <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
-            <ChevronDown className="w-4 h-4" />
-          </button>
-          <button className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
-            <ChevronUp className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col h-full bg-panel-bg">
       <div 
         ref={scrollRef}
         className="flex-1 overflow-y-auto scrollbar-thin p-2 font-mono text-sm"
