@@ -30,6 +30,12 @@ const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
 const PhysicalSecurityPanel = lazy(() => import("./PhysicalSecurityPanel"));
 const MitreAttackPanel = lazy(() => import("./MitreAttackPanel"));
 const C2FrameworkPanel = lazy(() => import("./C2FrameworkPanel"));
+const PacketCapturePanel = lazy(() => import("./PacketCapturePanel"));
+const VulnScannerWorkflow = lazy(() => import("./VulnScannerWorkflow"));
+const APTEmulationPanel = lazy(() => import("./APTEmulationPanel"));
+const ZeroDayResearchPanel = lazy(() => import("./ZeroDayResearchPanel"));
+const ImplantBuilderPanel = lazy(() => import("./ImplantBuilderPanel"));
+const SIGINTPanel = lazy(() => import("./SIGINTPanel"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -74,7 +80,13 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       "exploit-db": "Exploit Database",
       "target-search": "Target Search",
       "version-control": "Version Control",
-      "attack-automation": "Attack Automation"
+      "attack-automation": "Attack Automation",
+      "packet-capture": "Packet Capture",
+      "vuln-scanner": "Vulnerability Scanner",
+      "apt-emulation": "APT Emulation",
+      "zero-day": "Zero-Day Research",
+      "implant-builder": "Implant Builder",
+      "sigint": "SIGINT Operations"
     };
     return titles[activePanel] || "Panel";
   };
