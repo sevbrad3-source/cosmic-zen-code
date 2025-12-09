@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle } from "lucide-react";
+import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -7,13 +7,15 @@ interface RightActivityBarProps {
 }
 
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
-  // Red Team offensive tools + moved items from left sidebar
   const items = [
     { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
+    { id: "packet-capture", icon: Activity, label: "Packet Capture" },
+    { id: "vuln-scanner", icon: Radar, label: "Vuln Scanner Workflow" },
+    { id: "apt-emulation", icon: Skull, label: "APT Emulation" },
+    { id: "zero-day", icon: Bug, label: "Zero-Day Research" },
+    { id: "implant-builder", icon: Cpu, label: "Implant Builder" },
+    { id: "sigint", icon: Signal, label: "SIGINT Operations" },
     { id: "exploit-db", icon: Files, label: "Exploit Database" },
-    { id: "target-search", icon: Search, label: "Target Search" },
-    { id: "version-control", icon: GitBranch, label: "Version Control" },
-    { id: "attack-automation", icon: PlayCircle, label: "Attack Automation" },
     { id: "mitre-attack", icon: Target, label: "MITRE ATT&CK" },
     { id: "c2-framework", icon: Radio, label: "C2 Framework" },
     { id: "beacons", icon: Radio, label: "Beacon Manager" },
