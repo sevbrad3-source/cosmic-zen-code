@@ -70,7 +70,11 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       "mitre-attack": "MITRE ATT&CK",
       "c2-framework": "C2 Framework",
       rowhammer: "Rowhammer Testing",
-      geomap: "Geographic Map"
+      geomap: "Geographic Map",
+      "exploit-db": "Exploit Database",
+      "target-search": "Target Search",
+      "version-control": "Version Control",
+      "attack-automation": "Attack Automation"
     };
     return titles[activePanel] || "Panel";
   };
@@ -378,10 +382,188 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "postexploit" && <PostExploitationPanel />}
         {activePanel === "rowhammer" && <RowhammerPanel />}
         {activePanel === "geomap" && <MapboxVisualization />}
+        {activePanel === "physical-security" && <PhysicalSecurityPanel />}
+        {activePanel === "mitre-attack" && <MitreAttackPanel />}
+        {activePanel === "c2-framework" && <C2FrameworkPanel />}
+        
+        {/* Moved from left sidebar */}
+        {activePanel === "exploit-db" && (
+          <div className="p-3 space-y-2">
+            <div className="text-xs text-text-muted mb-2">EXPLOIT DATABASE</div>
+            <ExploitDatabaseTree />
+          </div>
+        )}
+        {activePanel === "target-search" && (
+          <div className="p-3 space-y-2">
+            <input 
+              type="text" 
+              placeholder="Search targets, CVEs, exploits..." 
+              className="w-full h-7 bg-input-bg border border-input-border rounded px-2 text-xs text-text-primary"
+            />
+            <div className="text-xs text-text-muted mt-3">RECENT SEARCHES</div>
+            <div className="space-y-1 text-xs">
+              <div className="text-text-secondary hover:text-text-primary cursor-pointer p-1 hover:bg-sidebar-hover rounded">CVE-2024-23897</div>
+              <div className="text-text-secondary hover:text-text-primary cursor-pointer p-1 hover:bg-sidebar-hover rounded">192.168.1.0/24</div>
+              <div className="text-text-secondary hover:text-text-primary cursor-pointer p-1 hover:bg-sidebar-hover rounded">SMB exploits Windows Server</div>
+              <div className="text-text-secondary hover:text-text-primary cursor-pointer p-1 hover:bg-sidebar-hover rounded">Apache RCE vulnerabilities</div>
+            </div>
+          </div>
+        )}
+        {activePanel === "version-control" && (
+          <div className="p-3 text-xs space-y-2">
+            <div className="text-text-muted">MODIFIED FILES (3)</div>
+            <div className="space-y-1">
+              <div className="text-yellow-500 p-1 hover:bg-sidebar-hover rounded cursor-pointer">M exploits/web/sqli_auth_bypass.py</div>
+              <div className="text-green-500 p-1 hover:bg-sidebar-hover rounded cursor-pointer">A payloads/reverse_shells/new_shell.py</div>
+              <div className="text-yellow-500 p-1 hover:bg-sidebar-hover rounded cursor-pointer">M reconnaissance/port_scanner.go</div>
+            </div>
+            <button className="w-full h-7 bg-primary hover:bg-primary-hover text-primary-foreground rounded text-xs mt-2">
+              Commit Changes
+            </button>
+            <div className="text-text-muted mt-3">RECENT COMMITS</div>
+            <div className="space-y-1">
+              <div className="p-2 bg-panel-bg rounded border border-border">
+                <div className="text-text-primary text-xs">feat: added new SMB exploit</div>
+                <div className="text-text-muted text-[10px] mt-1">2 hours ago</div>
+              </div>
+            </div>
+          </div>
+        )}
+        {activePanel === "attack-automation" && (
+          <div className="p-3 text-xs space-y-2">
+            <div className="text-text-muted">AUTOMATED CAMPAIGNS</div>
+            <div className="space-y-2">
+              <div className="bg-panel-bg rounded p-2.5 border border-border">
+                <div className="text-text-primary font-semibold">Full Network Scan</div>
+                <div className="text-text-muted mt-0.5">192.168.1.0/24</div>
+                <button className="w-full h-6 bg-primary hover:bg-primary-hover text-primary-foreground rounded text-xs mt-2">
+                  Run Campaign
+                </button>
+              </div>
+              <div className="bg-panel-bg rounded p-2.5 border border-border">
+                <div className="text-text-primary font-semibold">Credential Harvesting</div>
+                <div className="text-text-muted mt-0.5">All compromised hosts</div>
+                <div className="w-full h-6 bg-green-600/20 border border-green-500/50 text-green-400 rounded text-xs mt-2 flex items-center justify-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Running...
+                </div>
+              </div>
+              <div className="bg-panel-bg rounded p-2.5 border border-border">
+                <div className="text-text-primary font-semibold">Persistence Check</div>
+                <div className="text-text-muted mt-0.5">Verify backdoor integrity</div>
+                <button className="w-full h-6 bg-primary hover:bg-primary-hover text-primary-foreground rounded text-xs mt-2">
+                  Run Campaign
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         </Suspense>
       </div>
     </div>
   );
+};
+
+// Exploit Database Tree Component
+const ExploitDatabaseTree = () => {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    exploits: true,
+    web: true
+  });
+
+  const toggleExpand = (name: string) => {
+    setExpanded(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const folders = [
+    {
+      name: "exploits",
+      children: [
+        {
+          name: "web",
+          children: [
+            "sqli_auth_bypass.py",
+            "xss_reflected.js",
+            "rce_apache_struts.py"
+          ]
+        },
+        {
+          name: "network",
+          children: [
+            "smb_eternalblue.py",
+            "ssh_bruteforce.py",
+            "rdp_bluekeep.rb"
+          ]
+        },
+        {
+          name: "privilege_escalation",
+          children: [
+            "sudo_exploit.sh",
+            "kernel_exploit_4.15.c",
+            "token_impersonation.ps1"
+          ]
+        }
+      ]
+    },
+    {
+      name: "payloads",
+      children: [
+        {
+          name: "reverse_shells",
+          children: [
+            "tcp_shell.py",
+            "powershell_rev.ps1",
+            "bash_reverse.sh"
+          ]
+        },
+        {
+          name: "webshells",
+          children: [
+            "php_webshell.php",
+            "aspx_shell.aspx"
+          ]
+        }
+      ]
+    },
+    {
+      name: "reconnaissance",
+      children: [
+        "nmap_scans.sh",
+        "subdomain_enum.py",
+        "osint_gather.py"
+      ]
+    }
+  ];
+
+  const renderTree = (items: any[], level = 0) => (
+    <div>
+      {items.map((item, idx) => {
+        const isFolder = typeof item === "object";
+        const name = isFolder ? item.name : item;
+        const isExp = expanded[name];
+
+        return (
+          <div key={idx}>
+            <button
+              onClick={() => isFolder && toggleExpand(name)}
+              className="w-full flex items-center gap-1 px-2 py-0.5 text-xs hover:bg-sidebar-hover rounded transition-colors text-text-primary"
+              style={{ paddingLeft: `${level * 12 + 8}px` }}
+            >
+              {isFolder ? (
+                <span className="text-[10px] text-text-muted">{isExp ? "▼" : "▶"}</span>
+              ) : (
+                <span className="w-3" />
+              )}
+              <span className={isFolder ? "text-primary" : "text-text-secondary"}>{name}</span>
+            </button>
+            {isFolder && isExp && item.children && renderTree(item.children, level + 1)}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  return renderTree(folders);
 };
 
 export default RightPanel;

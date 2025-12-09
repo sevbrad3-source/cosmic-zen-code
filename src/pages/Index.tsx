@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import TitleBar from "@/components/editor/TitleBar";
-import ActivityBar from "@/components/editor/ActivityBar";
-import Sidebar from "@/components/editor/Sidebar";
 import EditorArea from "@/components/editor/EditorArea";
 import StatusBar from "@/components/editor/StatusBar";
 import RightActivityBar from "@/components/editor/RightActivityBar";
@@ -11,7 +9,6 @@ import BlueTeamPanel from "@/components/editor/BlueTeamPanel";
 import { ThemeName } from "@/lib/themes";
 
 const Index = () => {
-  const [activeView, setActiveView] = useState("explorer");
   const [activeRightPanel, setActiveRightPanel] = useState("");
   const [activeBluePanel, setActiveBluePanel] = useState("");
   const [activeBottomPanel, setActiveBottomPanel] = useState("terminal");
@@ -35,10 +32,6 @@ const Index = () => {
         {/* Blue Team - Left Side */}
         <BlueTeamActivityBar activePanel={activeBluePanel} onPanelChange={setActiveBluePanel} />
         <BlueTeamPanel activePanel={activeBluePanel} onClose={() => setActiveBluePanel("")} />
-        
-        {/* Original Left Sidebar */}
-        <ActivityBar activeView={activeView} onViewChange={setActiveView} />
-        <Sidebar activeView={activeView} />
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">

@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull } from "lucide-react";
+import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -7,9 +7,13 @@ interface RightActivityBarProps {
 }
 
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
-  // Right drawer - RED TEAM offensive tools
+  // Red Team offensive tools + moved items from left sidebar
   const items = [
     { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
+    { id: "exploit-db", icon: Files, label: "Exploit Database" },
+    { id: "target-search", icon: Search, label: "Target Search" },
+    { id: "version-control", icon: GitBranch, label: "Version Control" },
+    { id: "attack-automation", icon: PlayCircle, label: "Attack Automation" },
     { id: "mitre-attack", icon: Target, label: "MITRE ATT&CK" },
     { id: "c2-framework", icon: Radio, label: "C2 Framework" },
     { id: "beacons", icon: Radio, label: "Beacon Manager" },
@@ -26,7 +30,7 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
   ];
 
   return (
-    <div className="w-12 bg-[hsl(0,100%,8%)] border-l border-[hsl(0,100%,20%)] flex flex-col items-center py-2 gap-1">
+    <div className="w-12 bg-[hsl(0,100%,8%)] border-l border-[hsl(0,100%,20%)] flex flex-col items-center py-2 gap-0.5 overflow-y-auto scrollbar-thin">
       <div className="w-8 h-8 mb-2 flex items-center justify-center rounded bg-[hsl(0,100%,25%)]">
         <Skull className="w-5 h-5 text-[hsl(0,100%,70%)]" />
       </div>
@@ -36,13 +40,13 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
             <TooltipTrigger asChild>
               <button
                 onClick={() => onPanelChange(item.id === activePanel ? "" : item.id)}
-                className={`w-12 h-10 flex items-center justify-center transition-colors relative group ${
+                className={`w-12 h-9 flex items-center justify-center transition-colors relative group ${
                   activePanel === item.id
                     ? "text-[hsl(0,100%,70%)] bg-[hsl(0,100%,15%)]"
                     : "text-[hsl(0,60%,50%)] hover:text-[hsl(0,100%,70%)] hover:bg-[hsl(0,100%,12%)]"
                 }`}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-4 h-4" />
                 {activePanel === item.id && (
                   <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[hsl(0,100%,50%)]" />
                 )}

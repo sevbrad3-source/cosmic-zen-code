@@ -47,34 +47,53 @@ const MapboxVisualization = () => {
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken) return;
 
-    setLoading(false);
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      projection: { name: 'globe' },
-      zoom: 1.8,
-      center: [20, 30],
-      pitch: 45,
-    });
+    // Ensure container is ready
+    const container = mapContainer.current;
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      // Container not yet sized, wait a bit
+      const timer = setTimeout(() => {
+        setLoading(true);
+        setMapboxToken(prev => prev); // trigger re-render
+      }, 100);
+      return () => clearTimeout(timer);
+    }
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'bottom-right'
-    );
-
-    map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(5, 5, 8)',
-        'high-color': 'rgb(20, 5, 10)',
-        'horizon-blend': 0.15,
-        'star-intensity': 0.2,
-        'space-color': 'rgb(5, 5, 8)',
+    try {
+      mapboxgl.accessToken = mapboxToken;
+      
+      map.current = new mapboxgl.Map({
+        container: container,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        projection: 'globe',
+        zoom: 1.8,
+        center: [20, 30],
+        pitch: 45,
       });
-    });
+
+      map.current.on('load', () => {
+        setLoading(false);
+      });
+
+      map.current.addControl(
+        new mapboxgl.NavigationControl({
+          visualizePitch: true,
+        }),
+        'bottom-right'
+      );
+
+      map.current.on('style.load', () => {
+        map.current?.setFog({
+          color: 'rgb(5, 5, 8)',
+          'high-color': 'rgb(20, 5, 10)',
+          'horizon-blend': 0.15,
+          'star-intensity': 0.2,
+          'space-color': 'rgb(5, 5, 8)',
+        });
+      });
+    } catch (err) {
+      console.error('Error initializing map:', err);
+      setLoading(false);
+    }
 
     const attackLocations = [
       { coords: [-122.4194, 37.7749], name: "San Francisco", type: "C2 Server", status: "active", threat: "critical" },
