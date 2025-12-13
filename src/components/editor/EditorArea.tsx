@@ -12,6 +12,7 @@ const LiveCollaborationPanel = lazy(() => import("./LiveCollaborationPanel"));
 const Terminal = lazy(() => import("./Terminal"));
 const LogStream = lazy(() => import("./LogStream"));
 const ListenerPanel = lazy(() => import("./ListenerPanel"));
+const LogWhispererPanel = lazy(() => import("./LogWhispererPanel"));
 
 interface Tab {
   id: string;
@@ -202,6 +203,8 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
         return <LogStream />;
       case "listeners":
         return <ListenerPanel />;
+      case "logwhisperer":
+        return <LogWhispererPanel />;
       default:
         return <Terminal />;
     }
@@ -211,6 +214,7 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
     { id: "terminal", label: "Terminal", icon: TerminalIcon },
     { id: "logs", label: "Logs", icon: Activity },
     { id: "listeners", label: "Listeners", icon: Radio },
+    { id: "logwhisperer", label: "LogWhisperer", icon: Activity },
   ];
 
   return (

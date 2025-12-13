@@ -1,4 +1,4 @@
-import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal } from "lucide-react";
+import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal, UserX } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
@@ -9,6 +9,7 @@ interface RightActivityBarProps {
 const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
   const items = [
     { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
+    { id: "social-eng", icon: UserX, label: "Social Engineering" },
     { id: "packet-capture", icon: Activity, label: "Packet Capture" },
     { id: "vuln-scanner", icon: Radar, label: "Vuln Scanner Workflow" },
     { id: "apt-emulation", icon: Skull, label: "APT Emulation" },
