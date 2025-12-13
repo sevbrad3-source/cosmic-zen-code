@@ -1,4 +1,4 @@
-import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart } from "lucide-react";
+import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Users, Mail } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BlueTeamActivityBarProps {
@@ -21,6 +21,7 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "purple-team", icon: ShieldCheck, label: "Purple Team" },
     { id: "playbooks", icon: FileBarChart, label: "Scenario Playbooks" },
     { id: "vuln-management", icon: Bug, label: "Vulnerability Mgmt" },
+    { id: "social-eng-defense", icon: Mail, label: "Social Eng Defense" },
   ];
 
   return (

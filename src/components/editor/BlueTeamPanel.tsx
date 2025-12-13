@@ -60,6 +60,8 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <AlertCenterPanel />;
       case "vuln-management":
         return <VulnerabilityManagementPanel />;
+      case "social-eng-defense":
+        return <SocialEngineeringDefensePanel />;
       default:
         return (
           <div className="p-4 text-[hsl(210,60%,60%)] text-sm">
