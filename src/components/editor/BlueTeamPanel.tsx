@@ -15,6 +15,7 @@ const DigitalForensicsPanel = lazy(() => import("./DigitalForensicsPanel"));
 const LogAnalysisPanel = lazy(() => import("./LogAnalysisPanel"));
 const AlertCenterPanel = lazy(() => import("./AlertCenterPanel"));
 const VulnerabilityManagementPanel = lazy(() => import("./VulnerabilityManagementPanel"));
+const SocialEngineeringDefensePanel = lazy(() => import("./SocialEngineeringDefensePanel"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
