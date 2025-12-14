@@ -47,183 +47,178 @@ const MapboxVisualization = () => {
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken) return;
 
-    // Ensure container is ready
     const container = mapContainer.current;
-    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-      // Container not yet sized, wait a bit
-      const timer = setTimeout(() => {
-        setLoading(true);
-        setMapboxToken(prev => prev); // trigger re-render
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-
-    try {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: container,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        projection: 'globe',
-        zoom: 1.8,
-        center: [20, 30],
-        pitch: 45,
-      });
-
-      map.current.on('load', () => {
-        setLoading(false);
-      });
-
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'bottom-right'
-      );
-
-      map.current.on('style.load', () => {
-        map.current?.setFog({
-          color: 'rgb(5, 5, 8)',
-          'high-color': 'rgb(20, 5, 10)',
-          'horizon-blend': 0.15,
-          'star-intensity': 0.2,
-          'space-color': 'rgb(5, 5, 8)',
-        });
-      });
-    } catch (err) {
-      console.error('Error initializing map:', err);
-      setLoading(false);
-    }
-
-    const attackLocations = [
-      { coords: [-122.4194, 37.7749], name: "San Francisco", type: "C2 Server", status: "active", threat: "critical" },
-      { coords: [139.6503, 35.6762], name: "Tokyo", type: "Attack Origin", status: "active", threat: "high" },
-      { coords: [2.3522, 48.8566], name: "Paris", type: "Proxy Node", status: "active", threat: "medium" },
-      { coords: [-0.1276, 51.5074], name: "London", type: "Target Network", status: "compromised", threat: "critical" },
-      { coords: [13.4050, 52.5200], name: "Berlin", type: "Lateral Movement", status: "active", threat: "high" },
-      { coords: [121.4737, 31.2304], name: "Shanghai", type: "Exfil Point", status: "active", threat: "critical" },
-      { coords: [-73.9857, 40.7484], name: "New York", type: "Target Network", status: "scanning", threat: "medium" },
-      { coords: [37.6173, 55.7558], name: "Moscow", type: "C2 Server", status: "active", threat: "critical" },
-      { coords: [-43.1729, -22.9068], name: "Rio de Janeiro", type: "Proxy Node", status: "standby", threat: "low" },
-      { coords: [77.2090, 28.6139], name: "New Delhi", type: "Attack Origin", status: "active", threat: "high" },
-    ];
-
-    const getMarkerColor = (threat: string) => {
-      switch (threat) {
-        case 'critical': return '#dc2626';
-        case 'high': return '#ea580c';
-        case 'medium': return '#ca8a04';
-        default: return '#65a30d';
-      }
-    };
-
-    const getMarkerSize = (type: string) => {
-      switch (type) {
-        case 'C2 Server': return 16;
-        case 'Target Network': return 14;
-        default: return 10;
-      }
-    };
-
-    map.current.on('load', () => {
-      // Add pulsing animation for critical markers
-      attackLocations.forEach((location, index) => {
-        const color = getMarkerColor(location.threat);
-        const size = getMarkerSize(location.type);
+    
+    // Small delay to ensure container is sized
+    const initTimeout = setTimeout(() => {
+      try {
+        mapboxgl.accessToken = mapboxToken;
         
-        const el = document.createElement('div');
-        el.className = 'attack-marker';
-        el.style.width = `${size}px`;
-        el.style.height = `${size}px`;
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = color;
-        el.style.border = `2px solid ${color}`;
-        el.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}40`;
-        el.style.cursor = 'pointer';
-        el.style.animation = location.threat === 'critical' ? 'pulse 2s infinite' : 'none';
+        map.current = new mapboxgl.Map({
+          container: container,
+          style: 'mapbox://styles/mapbox/dark-v11',
+          projection: 'globe',
+          zoom: 1.8,
+          center: [20, 30],
+          pitch: 45,
+        });
 
-        const popup = new mapboxgl.Popup({ 
-          offset: 25,
-          className: 'threat-popup'
-        }).setHTML(
-          `<div style="padding: 12px; background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%); color: #e5e5e5; border-radius: 8px; border: 1px solid ${color}40; min-width: 180px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; box-shadow: 0 0 8px ${color};"></div>
-              <div style="font-size: 13px; font-weight: 600; color: #fff;">${location.name}</div>
-            </div>
-            <div style="font-size: 11px; color: ${color}; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${location.type}</div>
-            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a3a3a3; padding-top: 8px; border-top: 1px solid #333;">
-              <span>Status: <span style="color: ${location.status === 'compromised' ? '#dc2626' : '#22c55e'};">${location.status}</span></span>
-              <span>Threat: <span style="color: ${color};">${location.threat}</span></span>
-            </div>
-            <div style="font-size: 9px; color: #525252; margin-top: 6px; font-style: italic;">⚠ Simulated target</div>
-          </div>`
+        map.current.addControl(
+          new mapboxgl.NavigationControl({
+            visualizePitch: true,
+          }),
+          'bottom-right'
         );
 
-        new mapboxgl.Marker(el)
-          .setLngLat(location.coords as [number, number])
-          .setPopup(popup)
-          .addTo(map.current!);
-      });
+        map.current.on('style.load', () => {
+          map.current?.setFog({
+            color: 'rgb(5, 5, 8)',
+            'high-color': 'rgb(20, 5, 10)',
+            'horizon-blend': 0.15,
+            'star-intensity': 0.2,
+            'space-color': 'rgb(5, 5, 8)',
+          });
+        });
 
-      // Draw connection lines between related nodes
-      const connections = [
-        { from: [-122.4194, 37.7749], to: [-0.1276, 51.5074] },
-        { from: [37.6173, 55.7558], to: [13.4050, 52.5200] },
-        { from: [139.6503, 35.6762], to: [121.4737, 31.2304] },
-      ];
+        const attackLocations = [
+          { coords: [-122.4194, 37.7749], name: "San Francisco", type: "C2 Server", status: "active", threat: "critical" },
+          { coords: [139.6503, 35.6762], name: "Tokyo", type: "Attack Origin", status: "active", threat: "high" },
+          { coords: [2.3522, 48.8566], name: "Paris", type: "Proxy Node", status: "active", threat: "medium" },
+          { coords: [-0.1276, 51.5074], name: "London", type: "Target Network", status: "compromised", threat: "critical" },
+          { coords: [13.4050, 52.5200], name: "Berlin", type: "Lateral Movement", status: "active", threat: "high" },
+          { coords: [121.4737, 31.2304], name: "Shanghai", type: "Exfil Point", status: "active", threat: "critical" },
+          { coords: [-73.9857, 40.7484], name: "New York", type: "Target Network", status: "scanning", threat: "medium" },
+          { coords: [37.6173, 55.7558], name: "Moscow", type: "C2 Server", status: "active", threat: "critical" },
+          { coords: [-43.1729, -22.9068], name: "Rio de Janeiro", type: "Proxy Node", status: "standby", threat: "low" },
+          { coords: [77.2090, 28.6139], name: "New Delhi", type: "Attack Origin", status: "active", threat: "high" },
+        ];
 
-      map.current?.addSource('connections', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: connections.map(conn => ({
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: [conn.from, conn.to]
+        const getMarkerColor = (threat: string) => {
+          switch (threat) {
+            case 'critical': return '#dc2626';
+            case 'high': return '#ea580c';
+            case 'medium': return '#ca8a04';
+            default: return '#65a30d';
+          }
+        };
+
+        const getMarkerSize = (type: string) => {
+          switch (type) {
+            case 'C2 Server': return 16;
+            case 'Target Network': return 14;
+            default: return 10;
+          }
+        };
+
+        map.current.on('load', () => {
+          setLoading(false);
+          
+          attackLocations.forEach((location) => {
+            const color = getMarkerColor(location.threat);
+            const size = getMarkerSize(location.type);
+            
+            const el = document.createElement('div');
+            el.className = 'attack-marker';
+            el.style.width = `${size}px`;
+            el.style.height = `${size}px`;
+            el.style.borderRadius = '50%';
+            el.style.backgroundColor = color;
+            el.style.border = `2px solid ${color}`;
+            el.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}40`;
+            el.style.cursor = 'pointer';
+            el.style.animation = location.threat === 'critical' ? 'pulse 2s infinite' : 'none';
+
+            const popup = new mapboxgl.Popup({ 
+              offset: 25,
+              className: 'threat-popup'
+            }).setHTML(
+              `<div style="padding: 12px; background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%); color: #e5e5e5; border-radius: 8px; border: 1px solid ${color}40; min-width: 180px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; box-shadow: 0 0 8px ${color};"></div>
+                  <div style="font-size: 13px; font-weight: 600; color: #fff;">${location.name}</div>
+                </div>
+                <div style="font-size: 11px; color: ${color}; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${location.type}</div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a3a3a3; padding-top: 8px; border-top: 1px solid #333;">
+                  <span>Status: <span style="color: ${location.status === 'compromised' ? '#dc2626' : '#22c55e'};">${location.status}</span></span>
+                  <span>Threat: <span style="color: ${color};">${location.threat}</span></span>
+                </div>
+                <div style="font-size: 9px; color: #525252; margin-top: 6px; font-style: italic;">⚠ Simulated target</div>
+              </div>`
+            );
+
+            new mapboxgl.Marker(el)
+              .setLngLat(location.coords as [number, number])
+              .setPopup(popup)
+              .addTo(map.current!);
+          });
+
+          const connections = [
+            { from: [-122.4194, 37.7749], to: [-0.1276, 51.5074] },
+            { from: [37.6173, 55.7558], to: [13.4050, 52.5200] },
+            { from: [139.6503, 35.6762], to: [121.4737, 31.2304] },
+          ];
+
+          map.current?.addSource('connections', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: connections.map(conn => ({
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [conn.from, conn.to]
+                }
+              }))
             }
-          }))
+          });
+
+          map.current?.addLayer({
+            id: 'connection-lines',
+            type: 'line',
+            source: 'connections',
+            paint: {
+              'line-color': '#dc2626',
+              'line-width': 1.5,
+              'line-opacity': 0.4,
+              'line-dasharray': [2, 2]
+            }
+          });
+        });
+
+        // Slow rotation
+        const secondsPerRevolution = 360;
+        let userInteracting = false;
+
+        function spinGlobe() {
+          if (!map.current || userInteracting) return;
+          const zoom = map.current.getZoom();
+          if (zoom < 4) {
+            const distancePerSecond = 360 / secondsPerRevolution;
+            const center = map.current.getCenter();
+            center.lng -= distancePerSecond / 60;
+            map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+          }
         }
-      });
 
-      map.current?.addLayer({
-        id: 'connection-lines',
-        type: 'line',
-        source: 'connections',
-        paint: {
-          'line-color': '#dc2626',
-          'line-width': 1.5,
-          'line-opacity': 0.4,
-          'line-dasharray': [2, 2]
-        }
-      });
-    });
+        map.current.on('mousedown', () => { userInteracting = true; });
+        map.current.on('mouseup', () => { userInteracting = false; });
+        map.current.on('moveend', spinGlobe);
+        
+        const spinInterval = setInterval(spinGlobe, 1000);
 
-    // Slow rotation
-    const secondsPerRevolution = 360;
-    let userInteracting = false;
-
-    function spinGlobe() {
-      if (!map.current || userInteracting) return;
-      const zoom = map.current.getZoom();
-      if (zoom < 4) {
-        const distancePerSecond = 360 / secondsPerRevolution;
-        const center = map.current.getCenter();
-        center.lng -= distancePerSecond / 60;
-        map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+        return () => {
+          clearInterval(spinInterval);
+          map.current?.remove();
+        };
+      } catch (err) {
+        console.error('Error initializing map:', err);
+        setLoading(false);
       }
-    }
-
-    map.current.on('mousedown', () => { userInteracting = true; });
-    map.current.on('mouseup', () => { userInteracting = false; });
-    map.current.on('moveend', spinGlobe);
-    
-    const spinInterval = setInterval(spinGlobe, 1000);
+    }, 100);
 
     return () => {
-      clearInterval(spinInterval);
+      clearTimeout(initTimeout);
       map.current?.remove();
     };
   }, [mapboxToken]);

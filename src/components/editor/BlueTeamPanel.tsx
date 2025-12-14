@@ -16,6 +16,10 @@ const LogAnalysisPanel = lazy(() => import("./LogAnalysisPanel"));
 const AlertCenterPanel = lazy(() => import("./AlertCenterPanel"));
 const VulnerabilityManagementPanel = lazy(() => import("./VulnerabilityManagementPanel"));
 const SocialEngineeringDefensePanel = lazy(() => import("./SocialEngineeringDefensePanel"));
+const SOCDashboardPanel = lazy(() => import("./SOCDashboardPanel"));
+const SecureCommsPanel = lazy(() => import("./SecureCommsPanel"));
+const ThreatModelingPanel = lazy(() => import("./ThreatModelingPanel"));
+const NetworkDefensePanel = lazy(() => import("./NetworkDefensePanel"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -63,6 +67,14 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <VulnerabilityManagementPanel />;
       case "social-eng-defense":
         return <SocialEngineeringDefensePanel />;
+      case "soc-dashboard":
+        return <SOCDashboardPanel />;
+      case "secure-comms":
+        return <SecureCommsPanel />;
+      case "threat-modeling":
+        return <ThreatModelingPanel />;
+      case "network-defense":
+        return <NetworkDefensePanel />;
       default:
         return (
           <div className="p-4 text-[hsl(210,60%,60%)] text-sm">
