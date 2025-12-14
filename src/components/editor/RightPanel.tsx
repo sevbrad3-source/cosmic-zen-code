@@ -36,6 +36,7 @@ const APTEmulationPanel = lazy(() => import("./APTEmulationPanel"));
 const ZeroDayResearchPanel = lazy(() => import("./ZeroDayResearchPanel"));
 const ImplantBuilderPanel = lazy(() => import("./ImplantBuilderPanel"));
 const SIGINTPanel = lazy(() => import("./SIGINTPanel"));
+const SocialEngineeringPanel = lazy(() => import("./SocialEngineeringPanel"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -396,6 +397,13 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "geomap" && <MapboxVisualization />}
         {activePanel === "physical-security" && <PhysicalSecurityPanel />}
         {activePanel === "mitre-attack" && <MitreAttackPanel />}
+        {activePanel === "social-engineering" && <SocialEngineeringPanel />}
+        {activePanel === "packet-capture" && <PacketCapturePanel />}
+        {activePanel === "vuln-scanner" && <VulnScannerWorkflow />}
+        {activePanel === "apt-emulation" && <APTEmulationPanel />}
+        {activePanel === "zero-day" && <ZeroDayResearchPanel />}
+        {activePanel === "implant-builder" && <ImplantBuilderPanel />}
+        {activePanel === "sigint" && <SIGINTPanel />}
         {activePanel === "c2-framework" && <C2FrameworkPanel />}
         
         {/* Moved from left sidebar */}
