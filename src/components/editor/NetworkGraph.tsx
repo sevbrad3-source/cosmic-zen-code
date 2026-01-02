@@ -46,32 +46,55 @@ const NetworkGraph = () => {
   const [showLabels, setShowLabels] = useState(true);
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 100, h: 650 });
   const svgRef = useRef<SVGSVGElement>(null);
-  const [animatedPackets, setAnimatedPackets] = useState<{ id: string; progress: number; from: string; to: string }[]>([]);
+  const [animatedPackets, setAnimatedPackets] = useState<{ id: string; progress: number; from: string; to: string; type?: string; size?: string }[]>([]);
 
-  // Simulated packet animation
+  const [showPacketFlow, setShowPacketFlow] = useState(true);
+  const [packetSpeed, setPacketSpeed] = useState(1);
+
+  // Enhanced packet animation with different packet types
   useEffect(() => {
+    if (!showPacketFlow) return;
+    
     const interval = setInterval(() => {
       setAnimatedPackets(prev => {
-        const updated = prev.map(p => ({ ...p, progress: p.progress + 0.02 })).filter(p => p.progress < 1);
+        const updated = prev.map(p => ({ 
+          ...p, 
+          progress: p.progress + (0.015 * packetSpeed)
+        })).filter(p => p.progress < 1);
         
-        // Add new random packets
-        if (Math.random() > 0.7 && updated.length < 8) {
+        // Add new random packets with varying frequency based on edge activity
+        if (updated.length < 15) {
           const activeEdges = edges.filter(e => e.active);
           if (activeEdges.length > 0) {
-            const edge = activeEdges[Math.floor(Math.random() * activeEdges.length)];
-            updated.push({
-              id: Math.random().toString(36),
-              progress: 0,
-              from: edge.from,
-              to: edge.to
+            // Higher bandwidth edges spawn more packets
+            const weightedEdges = activeEdges.flatMap(e => {
+              const weight = Math.ceil((e.bandwidth || 100) / 200);
+              return Array(weight).fill(e);
             });
+            
+            if (Math.random() > 0.4) {
+              const edge = weightedEdges[Math.floor(Math.random() * weightedEdges.length)];
+              const packetTypes = ['data', 'ack', 'syn', 'encrypted', 'alert'] as const;
+              const packetType = edge.encrypted ? 'encrypted' : 
+                Math.random() > 0.9 ? 'alert' : 
+                Math.random() > 0.7 ? 'ack' : 'data';
+              
+              updated.push({
+                id: Math.random().toString(36),
+                progress: 0,
+                from: edge.from,
+                to: edge.to,
+                type: packetType,
+                size: Math.random() > 0.7 ? 'large' : 'normal'
+              });
+            }
           }
         }
         return updated;
       });
-    }, 50);
+    }, 35);
     return () => clearInterval(interval);
-  }, []);
+  }, [showPacketFlow, packetSpeed]);
 
   const nodes: Node[] = [
     // External Zone
@@ -386,6 +409,20 @@ const NetworkGraph = () => {
           {showLabels ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
         <button 
+          onClick={() => setShowPacketFlow(!showPacketFlow)}
+          className={`w-7 h-7 flex items-center justify-center hover:bg-neutral-700 rounded transition-colors ${showPacketFlow ? "text-cyan-400" : "text-neutral-400"}`}
+          title="Toggle Packet Flow"
+        >
+          <Activity className="w-4 h-4" />
+        </button>
+        <button 
+          onClick={() => setPacketSpeed(s => s === 1 ? 2 : s === 2 ? 0.5 : 1)}
+          className="w-7 h-7 flex items-center justify-center hover:bg-neutral-700 rounded text-neutral-400 hover:text-white transition-colors"
+          title={`Speed: ${packetSpeed}x`}
+        >
+          <Zap className={`w-4 h-4 ${packetSpeed === 2 ? "text-yellow-400" : packetSpeed === 0.5 ? "text-blue-400" : ""}`} />
+        </button>
+        <button 
           onClick={() => setZoom(1)}
           className="w-7 h-7 flex items-center justify-center hover:bg-neutral-700 rounded text-neutral-400 hover:text-white transition-colors"
         >
@@ -407,7 +444,27 @@ const NetworkGraph = () => {
         <div className="w-px h-4 bg-neutral-700" />
         <div className="text-neutral-400">{nodes.length} Nodes</div>
         <div className="text-neutral-400">{edges.filter(e => e.active).length} Active Links</div>
+        {showPacketFlow && (
+          <>
+            <div className="w-px h-4 bg-neutral-700" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-cyan-400" />
+              <span className="text-cyan-400">{animatedPackets.length} Packets</span>
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Packet Legend */}
+      {showPacketFlow && (
+        <div className="absolute bottom-2 right-2 z-20 flex items-center gap-2 bg-black/80 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-neutral-800 text-[9px] font-mono">
+          <span className="text-neutral-500">Packets:</span>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-cyan-400" /><span className="text-cyan-400">Data</span></div>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-400" /><span className="text-green-400">ACK</span></div>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-purple-400" /><span className="text-purple-400">Encrypted</span></div>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400" /><span className="text-red-400">Alert</span></div>
+        </div>
+      )}
 
       {/* Main Graph */}
       <svg 
@@ -487,8 +544,8 @@ const NetworkGraph = () => {
           );
         })}
 
-        {/* Animated packets */}
-        {animatedPackets.map(packet => {
+        {/* Animated packets with enhanced visualization */}
+        {showPacketFlow && animatedPackets.map(packet => {
           const fromNode = nodes.find(n => n.id === packet.from);
           const toNode = nodes.find(n => n.id === packet.to);
           if (!fromNode || !toNode) return null;
@@ -496,15 +553,68 @@ const NetworkGraph = () => {
           const x = fromNode.x + (toNode.x - fromNode.x) * packet.progress;
           const y = fromNode.y + (toNode.y - fromNode.y) * packet.progress;
           
+          // Different colors for packet types
+          const getPacketColor = (type?: string) => {
+            switch (type) {
+              case 'encrypted': return 'hsl(280, 100%, 70%)';
+              case 'alert': return 'hsl(0, 100%, 60%)';
+              case 'ack': return 'hsl(120, 80%, 60%)';
+              case 'syn': return 'hsl(45, 100%, 60%)';
+              default: return 'hsl(180, 100%, 60%)';
+            }
+          };
+          
+          const packetColor = getPacketColor(packet.type);
+          const packetSize = packet.size === 'large' ? 1.2 : 0.8;
+          
           return (
-            <circle
-              key={packet.id}
-              cx={x}
-              cy={y}
-              r="0.8"
-              fill="hsl(180, 100%, 60%)"
-              filter="url(#glow)"
-            />
+            <g key={packet.id}>
+              {/* Packet trail effect */}
+              <circle
+                cx={x - (toNode.x - fromNode.x) * 0.02}
+                cy={y - (toNode.y - fromNode.y) * 0.02}
+                r={packetSize * 0.6}
+                fill={packetColor}
+                opacity={0.3}
+              />
+              <circle
+                cx={x - (toNode.x - fromNode.x) * 0.01}
+                cy={y - (toNode.y - fromNode.y) * 0.01}
+                r={packetSize * 0.8}
+                fill={packetColor}
+                opacity={0.5}
+              />
+              {/* Main packet */}
+              <circle
+                cx={x}
+                cy={y}
+                r={packetSize}
+                fill={packetColor}
+                filter="url(#glow)"
+              />
+              {/* Inner glow for encrypted packets */}
+              {packet.type === 'encrypted' && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={packetSize * 0.4}
+                  fill="white"
+                  opacity={0.8}
+                />
+              )}
+              {/* Alert indicator */}
+              {packet.type === 'alert' && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={packetSize * 1.5}
+                  fill="none"
+                  stroke="hsl(0, 100%, 60%)"
+                  strokeWidth="0.2"
+                  opacity={0.6}
+                />
+              )}
+            </g>
           );
         })}
 

@@ -411,6 +411,9 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         {activePanel === "implant-builder" && <ImplantBuilderPanel />}
         {activePanel === "sigint" && <SIGINTPanel />}
         {activePanel === "c2-framework" && <C2FrameworkPanel />}
+        {activePanel === "wireless-attack" && <WirelessAttackPanel />}
+        {activePanel === "password-cracking" && <PasswordCrackingPanel />}
+        {activePanel === "exfiltrator" && <ExfiltratorPanel />}
         
         {/* Moved from left sidebar */}
         {activePanel === "exploit-db" && (
