@@ -37,6 +37,9 @@ const ZeroDayResearchPanel = lazy(() => import("./ZeroDayResearchPanel"));
 const ImplantBuilderPanel = lazy(() => import("./ImplantBuilderPanel"));
 const SIGINTPanel = lazy(() => import("./SIGINTPanel"));
 const SocialEngineeringPanel = lazy(() => import("./SocialEngineeringPanel"));
+const WirelessAttackPanel = lazy(() => import("./WirelessAttackPanel"));
+const PasswordCrackingPanel = lazy(() => import("./PasswordCrackingPanel"));
+const ExfiltratorPanel = lazy(() => import("./ExfiltratorPanel"));
 
 interface RightPanelProps {
   activePanel: string;
@@ -87,7 +90,10 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
       "apt-emulation": "APT Emulation",
       "zero-day": "Zero-Day Research",
       "implant-builder": "Implant Builder",
-      "sigint": "SIGINT Operations"
+      "sigint": "SIGINT Operations",
+      "wireless-attack": "Wireless Attack Tools",
+      "password-cracking": "Password Cracking",
+      "exfiltrator": "Data Exfiltration"
     };
     return titles[activePanel] || "Panel";
   };
