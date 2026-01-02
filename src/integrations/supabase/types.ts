@@ -14,6 +14,317 @@ export type Database = {
   }
   public: {
     Tables: {
+      attack_campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_time: string | null
+          id: string
+          name: string
+          objectives: string[] | null
+          related_events: string[] | null
+          start_time: string | null
+          status: string
+          targets: Json | null
+          techniques_used: string[] | null
+          threat_actor_id: string | null
+          tools_used: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          name: string
+          objectives?: string[] | null
+          related_events?: string[] | null
+          start_time?: string | null
+          status?: string
+          targets?: Json | null
+          techniques_used?: string[] | null
+          threat_actor_id?: string | null
+          tools_used?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          name?: string
+          objectives?: string[] | null
+          related_events?: string[] | null
+          start_time?: string | null
+          status?: string
+          targets?: Json | null
+          techniques_used?: string[] | null
+          threat_actor_id?: string | null
+          tools_used?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attack_campaigns_threat_actor_id_fkey"
+            columns: ["threat_actor_id"]
+            isOneToOne: false
+            referencedRelation: "threat_actors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investigations: {
+        Row: {
+          assigned_to: string | null
+          closed_at: string | null
+          created_at: string
+          description: string | null
+          findings: string | null
+          id: string
+          mitre_tactics: string[] | null
+          priority: string
+          related_events: string[] | null
+          related_iocs: string[] | null
+          status: string
+          timeline: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          created_at?: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          mitre_tactics?: string[] | null
+          priority?: string
+          related_events?: string[] | null
+          related_iocs?: string[] | null
+          status?: string
+          timeline?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          closed_at?: string | null
+          created_at?: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          mitre_tactics?: string[] | null
+          priority?: string
+          related_events?: string[] | null
+          related_iocs?: string[] | null
+          status?: string
+          timeline?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      iocs: {
+        Row: {
+          created_at: string
+          description: string | null
+          first_seen: string
+          id: string
+          ioc_type: string
+          is_active: boolean
+          last_seen: string
+          metadata: Json | null
+          source: string | null
+          tags: string[] | null
+          threat_level: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          first_seen?: string
+          id?: string
+          ioc_type: string
+          is_active?: boolean
+          last_seen?: string
+          metadata?: Json | null
+          source?: string | null
+          tags?: string[] | null
+          threat_level: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          first_seen?: string
+          id?: string
+          ioc_type?: string
+          is_active?: boolean
+          last_seen?: string
+          metadata?: Json | null
+          source?: string | null
+          tags?: string[] | null
+          threat_level?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      network_assets: {
+        Row: {
+          asset_type: string
+          created_at: string
+          hostname: string | null
+          id: string
+          ip_address: string
+          is_compromised: boolean
+          last_scan: string | null
+          mac_address: string | null
+          metadata: Json | null
+          operating_system: string | null
+          risk_score: number | null
+          services: Json | null
+          updated_at: string
+          vulnerabilities: Json | null
+          zone: string | null
+        }
+        Insert: {
+          asset_type: string
+          created_at?: string
+          hostname?: string | null
+          id?: string
+          ip_address: string
+          is_compromised?: boolean
+          last_scan?: string | null
+          mac_address?: string | null
+          metadata?: Json | null
+          operating_system?: string | null
+          risk_score?: number | null
+          services?: Json | null
+          updated_at?: string
+          vulnerabilities?: Json | null
+          zone?: string | null
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          hostname?: string | null
+          id?: string
+          ip_address?: string
+          is_compromised?: boolean
+          last_scan?: string | null
+          mac_address?: string | null
+          metadata?: Json | null
+          operating_system?: string | null
+          risk_score?: number | null
+          services?: Json | null
+          updated_at?: string
+          vulnerabilities?: Json | null
+          zone?: string | null
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string
+          description: string
+          destination_ip: string | null
+          detected_at: string
+          event_type: string
+          id: string
+          mitre_technique: string | null
+          port: number | null
+          protocol: string | null
+          raw_data: Json | null
+          severity: string
+          source_ip: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          destination_ip?: string | null
+          detected_at?: string
+          event_type: string
+          id?: string
+          mitre_technique?: string | null
+          port?: number | null
+          protocol?: string | null
+          raw_data?: Json | null
+          severity: string
+          source_ip?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          destination_ip?: string | null
+          detected_at?: string
+          event_type?: string
+          id?: string
+          mitre_technique?: string | null
+          port?: number | null
+          protocol?: string | null
+          raw_data?: Json | null
+          severity?: string
+          source_ip?: string | null
+        }
+        Relationships: []
+      }
+      threat_actors: {
+        Row: {
+          aliases: string[] | null
+          country_of_origin: string | null
+          created_at: string
+          description: string | null
+          first_observed: string | null
+          id: string
+          is_active: boolean
+          known_ttps: string[] | null
+          last_activity: string | null
+          motivation: string | null
+          name: string
+          related_iocs: string[] | null
+          sophistication: string | null
+          target_industries: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          country_of_origin?: string | null
+          created_at?: string
+          description?: string | null
+          first_observed?: string | null
+          id?: string
+          is_active?: boolean
+          known_ttps?: string[] | null
+          last_activity?: string | null
+          motivation?: string | null
+          name: string
+          related_iocs?: string[] | null
+          sophistication?: string | null
+          target_industries?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          aliases?: string[] | null
+          country_of_origin?: string | null
+          created_at?: string
+          description?: string | null
+          first_observed?: string | null
+          id?: string
+          is_active?: boolean
+          known_ttps?: string[] | null
+          last_activity?: string | null
+          motivation?: string | null
+          name?: string
+          related_iocs?: string[] | null
+          sophistication?: string | null
+          target_industries?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           color: string
