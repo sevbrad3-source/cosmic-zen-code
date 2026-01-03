@@ -23,7 +23,9 @@ const NetworkDefensePanel = lazy(() => import("./NetworkDefensePanel"));
 const HoneypotManagementPanel = lazy(() => import("./HoneypotManagementPanel"));
 const DeceptionTechnologyPanel = lazy(() => import("./DeceptionTechnologyPanel"));
 const AttackPathVisualization = lazy(() => import("./AttackPathVisualization"));
-
+const ThreatActorPanel = lazy(() => import("./ThreatActorPanel"));
+const InvestigationCasePanel = lazy(() => import("./InvestigationCasePanel"));
+const NetworkAssetDiscoveryPanel = lazy(() => import("./NetworkAssetDiscoveryPanel"));
 interface BlueTeamPanelProps {
   activePanel: string;
   onClose: () => void;
@@ -56,6 +58,12 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <SecurityControlsPanel />;
       case "threat-intel":
         return <ThreatIntelFeedsPanel />;
+      case "threat-actors":
+        return <ThreatActorPanel />;
+      case "investigations":
+        return <InvestigationCasePanel />;
+      case "asset-discovery":
+        return <NetworkAssetDiscoveryPanel />;
       case "playbooks":
         return <ScenarioPlaybookPanel />;
       case "purple-team":
