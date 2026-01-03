@@ -1,4 +1,4 @@
-import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network } from "lucide-react";
+import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network, Crosshair, Layers, Zap } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BlueTeamActivityBarProps {
@@ -26,6 +26,9 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "secure-comms", icon: Radio, label: "Secure Comms" },
     { id: "threat-modeling", icon: GitBranch, label: "Threat Modeling" },
     { id: "network-defense", icon: Network, label: "Network Defense" },
+    { id: "honeypot", icon: Crosshair, label: "Honeypot Management" },
+    { id: "deception", icon: Layers, label: "Deception Technology" },
+    { id: "attack-path", icon: Zap, label: "Attack Path Analysis" },
   ];
 
   return (

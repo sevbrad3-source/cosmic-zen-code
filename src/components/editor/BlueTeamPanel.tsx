@@ -20,6 +20,9 @@ const SOCDashboardPanel = lazy(() => import("./SOCDashboardPanel"));
 const SecureCommsPanel = lazy(() => import("./SecureCommsPanel"));
 const ThreatModelingPanel = lazy(() => import("./ThreatModelingPanel"));
 const NetworkDefensePanel = lazy(() => import("./NetworkDefensePanel"));
+const HoneypotManagementPanel = lazy(() => import("./HoneypotManagementPanel"));
+const DeceptionTechnologyPanel = lazy(() => import("./DeceptionTechnologyPanel"));
+const AttackPathVisualization = lazy(() => import("./AttackPathVisualization"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -75,6 +78,12 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <ThreatModelingPanel />;
       case "network-defense":
         return <NetworkDefensePanel />;
+      case "honeypot":
+        return <HoneypotManagementPanel />;
+      case "deception":
+        return <DeceptionTechnologyPanel />;
+      case "attack-path":
+        return <AttackPathVisualization />;
       default:
         return (
           <div className="p-4 text-[hsl(210,60%,60%)] text-sm">
