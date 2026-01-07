@@ -252,7 +252,7 @@ const MapboxVisualization = () => {
   }
 
   return (
-    <div className="relative w-full h-full bg-black overflow-hidden">
+    <div className="relative w-full h-full min-h-[400px] bg-black overflow-hidden" style={{ minHeight: '400px' }}>
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -306,7 +306,7 @@ const MapboxVisualization = () => {
       </div>
 
       {/* Map Container */}
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%', minHeight: '400px' }} />
 
       {/* Legend */}
       <div className="absolute bottom-3 right-3 bg-black/90 border border-red-500/20 rounded-lg p-3 text-xs space-y-2 z-10 backdrop-blur-sm min-w-[160px]">
