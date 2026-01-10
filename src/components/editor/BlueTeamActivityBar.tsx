@@ -9,6 +9,8 @@ interface BlueTeamActivityBarProps {
 const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBarProps) => {
   const items = [
     { id: "global-dashboard", icon: Activity, label: "Global Threat Dashboard" },
+    { id: "threat-alerts", icon: Bell, label: "Threat Alerts" },
+    { id: "kill-chain", icon: Zap, label: "Kill Chain Visualization" },
     { id: "threat-hunt", icon: Search, label: "Threat Hunting" },
     { id: "detection-eng", icon: Radar, label: "Detection Engineering" },
     { id: "siem", icon: Activity, label: "SIEM & Analytics" },
@@ -18,6 +20,7 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "campaigns", icon: Crosshair, label: "Campaign Management" },
     { id: "investigations", icon: Briefcase, label: "Investigations" },
     { id: "asset-discovery", icon: Wifi, label: "Asset Discovery" },
+    { id: "report-generator", icon: FileBarChart, label: "Report Generator" },
     { id: "forensics", icon: Fingerprint, label: "Digital Forensics" },
     { id: "log-analysis", icon: FileSearch, label: "Log Analysis" },
     { id: "incident-response", icon: AlertTriangle, label: "Incident Response" },

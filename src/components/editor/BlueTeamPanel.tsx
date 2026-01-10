@@ -28,6 +28,9 @@ const InvestigationCasePanel = lazy(() => import("./InvestigationCasePanel"));
 const NetworkAssetDiscoveryPanel = lazy(() => import("./NetworkAssetDiscoveryPanel"));
 const CampaignManagementPanel = lazy(() => import("./CampaignManagementPanel"));
 const GlobalThreatDashboard = lazy(() => import("./GlobalThreatDashboard"));
+const ThreatAlertSystem = lazy(() => import("./ThreatAlertSystem"));
+const ThreatIntelReportGenerator = lazy(() => import("./ThreatIntelReportGenerator"));
+const KillChainVisualization = lazy(() => import("./KillChainVisualization"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -49,6 +52,12 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
     switch (activePanel) {
       case "global-dashboard":
         return <GlobalThreatDashboard />;
+      case "threat-alerts":
+        return <ThreatAlertSystem />;
+      case "kill-chain":
+        return <KillChainVisualization />;
+      case "report-generator":
+        return <ThreatIntelReportGenerator />;
       case "threat-hunt":
         return <ThreatHuntingPanel />;
       case "detection-eng":
