@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Shield, AlertTriangle, MapPin, Crosshair, Radio, Wifi, Server } from 'lucide-react';
+import { Shield, AlertTriangle, MapPin, Crosshair, Wifi, Server } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 const MapboxVisualization = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [initAttempt, setInitAttempt] = useState(0);
   const [stats, setStats] = useState({
     activeTargets: 5,
     c2Servers: 3,
@@ -21,21 +24,26 @@ const MapboxVisualization = () => {
     const getMapboxToken = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
+
         if (error) {
           console.error('Error fetching Mapbox token:', error);
+          setMapError("Failed to load map configuration");
           toast.error("Failed to load map configuration");
           setLoading(false);
           return;
         }
 
         if (data?.token) {
+          setMapError(null);
+          setLoading(true);
           setMapboxToken(data.token);
         } else {
+          setMapError("Map token missing");
           setLoading(false);
         }
       } catch (err) {
         console.error('Exception fetching Mapbox token:', err);
+        setMapError("Failed to initialize map");
         toast.error("Failed to initialize map");
         setLoading(false);
       }
@@ -48,19 +56,60 @@ const MapboxVisualization = () => {
     if (!mapContainer.current || !mapboxToken) return;
 
     const container = mapContainer.current;
-    
+
+    // ensure we don't keep a half-initialized instance around
+    if (map.current) {
+      try {
+        map.current.remove();
+      } catch {
+        // ignore
+      }
+      map.current = null;
+    }
+
+    setMapError(null);
+    setLoading(true);
+
     // Small delay to ensure container is sized
     const initTimeout = setTimeout(() => {
       try {
         mapboxgl.accessToken = mapboxToken;
-        
+
         map.current = new mapboxgl.Map({
-          container: container,
+          container,
           style: 'mapbox://styles/mapbox/dark-v11',
           projection: 'globe',
           zoom: 1.8,
           center: [20, 30],
           pitch: 45,
+        });
+
+        // If we never reach 'load', don't leave the UI stuck forever
+        const failSafe = window.setTimeout(() => {
+          if (loading) {
+            console.error('[Mapbox] load timeout: map stuck initializing');
+            setMapError('Map failed to load (timeout).');
+            setLoading(false);
+            try {
+              map.current?.remove();
+            } catch {
+              // ignore
+            }
+            map.current = null;
+          }
+        }, 12000);
+
+        map.current.on('error', (e) => {
+          console.error('[Mapbox] error event', e?.error || e);
+          window.clearTimeout(failSafe);
+          setMapError('Map failed to load (error).');
+          setLoading(false);
+          try {
+            map.current?.remove();
+          } catch {
+            // ignore
+          }
+          map.current = null;
         });
 
         map.current.addControl(
@@ -111,12 +160,22 @@ const MapboxVisualization = () => {
         };
 
         map.current.on('load', () => {
+          window.clearTimeout(failSafe);
+
+          // Force a resize after mount/layout to avoid permanent blank canvas
+          try {
+            map.current?.resize();
+            window.setTimeout(() => map.current?.resize(), 250);
+          } catch {
+            // ignore
+          }
+
           setLoading(false);
-          
+
           attackLocations.forEach((location) => {
             const color = getMarkerColor(location.threat);
             const size = getMarkerSize(location.type);
-            
+
             const el = document.createElement('div');
             el.className = 'attack-marker';
             el.style.width = `${size}px`;
@@ -128,7 +187,7 @@ const MapboxVisualization = () => {
             el.style.cursor = 'pointer';
             el.style.animation = location.threat === 'critical' ? 'pulse 2s infinite' : 'none';
 
-            const popup = new mapboxgl.Popup({ 
+            const popup = new mapboxgl.Popup({
               offset: 25,
               className: 'threat-popup'
             }).setHTML(
@@ -184,44 +243,57 @@ const MapboxVisualization = () => {
               'line-dasharray': [2, 2]
             }
           });
-        });
 
-        // Slow rotation
-        const secondsPerRevolution = 360;
-        let userInteracting = false;
+          // Slow rotation
+          const secondsPerRevolution = 360;
+          let userInteracting = false;
 
-        function spinGlobe() {
-          if (!map.current || userInteracting) return;
-          const zoom = map.current.getZoom();
-          if (zoom < 4) {
-            const distancePerSecond = 360 / secondsPerRevolution;
-            const center = map.current.getCenter();
-            center.lng -= distancePerSecond / 60;
-            map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+          function spinGlobe() {
+            if (!map.current || userInteracting) return;
+            const zoom = map.current.getZoom();
+            if (zoom < 4) {
+              const distancePerSecond = 360 / secondsPerRevolution;
+              const center = map.current.getCenter();
+              center.lng -= distancePerSecond / 60;
+              map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+            }
           }
-        }
 
-        map.current.on('mousedown', () => { userInteracting = true; });
-        map.current.on('mouseup', () => { userInteracting = false; });
-        map.current.on('moveend', spinGlobe);
-        
-        const spinInterval = setInterval(spinGlobe, 1000);
+          map.current.on('mousedown', () => { userInteracting = true; });
+          map.current.on('mouseup', () => { userInteracting = false; });
+          map.current.on('moveend', spinGlobe);
 
-        return () => {
-          clearInterval(spinInterval);
-          map.current?.remove();
-        };
+          const spinInterval = window.setInterval(spinGlobe, 1000);
+
+          // cleanup rotation timer if the map gets removed
+          map.current.once('remove', () => {
+            window.clearInterval(spinInterval);
+          });
+        });
       } catch (err) {
         console.error('Error initializing map:', err);
+        setMapError('Map failed to initialize.');
         setLoading(false);
+        try {
+          map.current?.remove();
+        } catch {
+          // ignore
+        }
+        map.current = null;
       }
-    }, 100);
+    }, 150);
 
     return () => {
       clearTimeout(initTimeout);
-      map.current?.remove();
+      try {
+        map.current?.remove();
+      } catch {
+        // ignore
+      }
+      map.current = null;
     };
-  }, [mapboxToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapboxToken, initAttempt]);
 
   if (loading) {
     return (
@@ -232,6 +304,54 @@ const MapboxVisualization = () => {
             <div className="absolute inset-2 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
           </div>
           <div className="text-xs text-red-500/70 font-mono">INITIALIZING GLOBAL THREAT MAP...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mapError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black p-4">
+        <div className="text-center space-y-3 max-w-md">
+          <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/30">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+          </div>
+          <div className="text-sm text-red-400 font-semibold">MAP INITIALIZATION FAILED</div>
+          <div className="text-xs text-neutral-500">{mapError}</div>
+          <div className="pt-2 flex items-center justify-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setInitAttempt((v) => v + 1);
+              }}
+            >
+              Retry
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setLoading(true);
+                setMapError(null);
+                setMapboxToken("");
+                supabase.functions.invoke('get-mapbox-token').then(({ data, error }) => {
+                  if (error || !data?.token) {
+                    setMapError('Failed to refresh token.');
+                    setLoading(false);
+                    return;
+                  }
+                  setMapboxToken(data.token);
+                }).catch(() => {
+                  setMapError('Failed to refresh token.');
+                  setLoading(false);
+                });
+              }}
+            >
+              Refresh Token
+            </Button>
+          </div>
+          <div className="text-[10px] text-neutral-600">Open the browser console and look for a “Mapbox error event” for the exact cause.</div>
         </div>
       </div>
     );
