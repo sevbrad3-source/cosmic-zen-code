@@ -131,11 +131,10 @@ export const ThreatResponsePlaybooks = () => {
     const enabledPlaybook = playbooks.find(p => p.id === "pb-1" && p.enabled);
     
     if (criticalIOCs.length > 0 && enabledPlaybook && !activeExecution) {
-      // Auto-trigger simulation (in production, this would be real)
       const recentIOC = criticalIOCs[0];
       const timeSinceDetection = Date.now() - new Date(recentIOC.created_at).getTime();
       
-      // Only trigger for IOCs detected in last 30 seconds (for demo)
+      // Only trigger for IOCs detected in last 30 seconds
       if (timeSinceDetection < 30000) {
         triggerPlaybook(enabledPlaybook, `Critical IOC: ${recentIOC.value}`);
       }
@@ -159,7 +158,7 @@ export const ThreatResponsePlaybooks = () => {
       description: triggeredBy
     });
 
-    // Simulate action execution
+    // Execute actions
     executeActions(execution);
   };
 

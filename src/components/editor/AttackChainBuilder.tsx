@@ -60,7 +60,6 @@ const AttackChainBuilder = () => {
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-primary" />
           <span className="text-sm font-semibold">Attack Chain Builder</span>
-          <Badge variant="outline" className="text-[10px]">SIMULATION MODE</Badge>
         </div>
         <div className="flex items-center gap-2">
           <button className="px-3 py-1 text-xs bg-primary hover:bg-primary-hover rounded text-primary-foreground flex items-center gap-1">
@@ -70,14 +69,6 @@ const AttackChainBuilder = () => {
             <Save className="w-3 h-3" /> Save
           </button>
         </div>
-      </div>
-
-      {/* Safety Banner */}
-      <div className="px-4 py-2 bg-[hsl(45,100%,10%)] border-b border-[hsl(45,100%,30%)] flex items-center gap-2">
-        <Shield className="w-4 h-4 text-[hsl(45,100%,60%)]" />
-        <span className="text-xs text-[hsl(45,100%,70%)]">
-          SAFE SIMULATION - All attack techniques are executed in a controlled VM environment. No actual system compromise occurs.
-        </span>
       </div>
 
       {/* Main Content */}

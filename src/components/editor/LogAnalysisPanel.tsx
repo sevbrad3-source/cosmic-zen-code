@@ -43,14 +43,6 @@ const LogAnalysisPanel = () => {
           </div>
         </div>
 
-        {/* Safety Banner */}
-        <div className="bg-[hsl(210,100%,8%)] border border-[hsl(210,100%,25%)]/30 rounded p-2 flex items-start gap-2">
-          <Shield className="w-3.5 h-3.5 text-[hsl(210,100%,50%)] flex-shrink-0 mt-0.5" />
-          <div className="text-[10px] text-[hsl(210,60%,60%)]">
-            <span className="font-semibold text-[hsl(210,100%,60%)]">Training Environment:</span> Analyzing simulated log data.
-          </div>
-        </div>
-
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-[hsl(210,60%,40%)]" />

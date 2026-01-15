@@ -52,11 +52,6 @@ const ThreatHuntingPanel = () => {
 
   return (
     <div className="p-3 space-y-4 text-[hsl(210,100%,85%)]">
-      {/* Safety Banner */}
-      <div className="bg-[hsl(210,100%,15%)] border border-[hsl(210,100%,30%)] rounded p-2 flex items-center gap-2">
-        <Eye className="w-4 h-4 text-[hsl(210,100%,60%)]" />
-        <span className="text-xs text-[hsl(210,100%,70%)]">DEFENSIVE SIMULATION - Threat Hunting Training Module</span>
-      </div>
 
       {/* Active Hunts */}
       <div className="space-y-2">
