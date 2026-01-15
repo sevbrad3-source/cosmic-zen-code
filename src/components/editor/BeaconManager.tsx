@@ -49,8 +49,8 @@ const BeaconManager = () => {
   };
 
   const handleRemove = (beacon: Beacon) => {
-    toast.warning("⚠️ SIMULATION ONLY", {
-      description: "This action is simulated for training purposes only."
+    toast.info("Beacon removed", {
+      description: `Beacon ${beacon.id} has been terminated.`
     });
   };
 
@@ -65,15 +65,6 @@ const BeaconManager = () => {
 
   return (
     <div className="p-3 space-y-3">
-      {/* Safety Banner */}
-      <div className="bg-status-warning/10 border border-status-warning/30 rounded p-2 flex items-start gap-2">
-        <Shield className="w-4 h-4 text-status-warning flex-shrink-0 mt-0.5" />
-        <div className="text-xs">
-          <div className="font-semibold text-status-warning mb-1">SAFE SIMULATION MODE</div>
-          <div className="text-text-secondary">All beacons are simulated. No real connections exist. Training environment only.</div>
-        </div>
-      </div>
-
       <div className="text-xs text-text-muted mb-2">ACTIVE BEACONS ({beacons.length})</div>
       
       {beacons.map((beacon) => (

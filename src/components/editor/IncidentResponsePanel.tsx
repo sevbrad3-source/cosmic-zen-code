@@ -54,10 +54,10 @@ const IncidentResponsePanel = () => {
 
   return (
     <div className="p-3 space-y-4 text-[hsl(210,100%,85%)]">
-      {/* Safety Banner */}
+      {/* Status Banner */}
       <div className="bg-[hsl(0,100%,15%)] border border-[hsl(0,100%,30%)] rounded p-2 flex items-center gap-2 animate-pulse">
         <AlertTriangle className="w-4 h-4 text-[hsl(0,100%,60%)]" />
-        <span className="text-xs text-[hsl(0,100%,80%)]">ACTIVE INCIDENT - IR Simulation Mode</span>
+        <span className="text-xs text-[hsl(0,100%,80%)]">ACTIVE INCIDENT - Response Mode</span>
       </div>
 
       {/* Active Incidents */}

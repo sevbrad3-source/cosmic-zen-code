@@ -47,14 +47,6 @@ const ProcessInjectionPanel = () => {
   return (
     <div className="p-3 space-y-3">
       {/* Critical Safety Banner */}
-      <div className="bg-status-error/10 border border-status-error/30 rounded p-2 flex items-start gap-2">
-        <Shield className="w-4 h-4 text-status-error flex-shrink-0 mt-0.5" />
-        <div className="text-xs">
-          <div className="font-semibold text-status-error mb-1">CRITICAL: SIMULATION ONLY</div>
-          <div className="text-text-secondary">This interface simulates process injection techniques for EDUCATION ONLY. No actual process manipulation occurs. All actions are mocked.</div>
-        </div>
-      </div>
-
       <div className="text-xs text-text-muted mb-2">PROCESS SELECTION</div>
 
       <div className="bg-surface-elevated border border-border rounded-lg p-3 space-y-3">
