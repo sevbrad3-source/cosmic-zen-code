@@ -1,4 +1,4 @@
-import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network, Crosshair, Layers, Zap, Users, Briefcase, Wifi } from "lucide-react";
+import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network, Crosshair, Layers, Zap, Users, Briefcase, Wifi, Clock, Share2, PlayCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BlueTeamActivityBarProps {
@@ -11,6 +11,9 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "global-dashboard", icon: Activity, label: "Global Threat Dashboard" },
     { id: "threat-alerts", icon: Bell, label: "Threat Alerts" },
     { id: "kill-chain", icon: Zap, label: "Kill Chain Visualization" },
+    { id: "attack-timeline", icon: Clock, label: "Attack Timeline" },
+    { id: "actor-graph", icon: Share2, label: "Actor Relationship Map" },
+    { id: "response-playbooks", icon: PlayCircle, label: "Response Playbooks" },
     { id: "threat-hunt", icon: Search, label: "Threat Hunting" },
     { id: "detection-eng", icon: Radar, label: "Detection Engineering" },
     { id: "siem", icon: Activity, label: "SIEM & Analytics" },
