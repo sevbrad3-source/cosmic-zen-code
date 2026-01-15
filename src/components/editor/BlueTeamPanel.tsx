@@ -31,6 +31,9 @@ const GlobalThreatDashboard = lazy(() => import("./GlobalThreatDashboard"));
 const ThreatAlertSystem = lazy(() => import("./ThreatAlertSystem"));
 const ThreatIntelReportGenerator = lazy(() => import("./ThreatIntelReportGenerator"));
 const KillChainVisualization = lazy(() => import("./KillChainVisualization"));
+const ThreatActorGraph = lazy(() => import("./ThreatActorGraph"));
+const ThreatResponsePlaybooks = lazy(() => import("./ThreatResponsePlaybooks"));
+const AttackTimelineView = lazy(() => import("./AttackTimelineView"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -56,6 +59,12 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <ThreatAlertSystem />;
       case "kill-chain":
         return <KillChainVisualization />;
+      case "attack-timeline":
+        return <AttackTimelineView />;
+      case "actor-graph":
+        return <ThreatActorGraph />;
+      case "response-playbooks":
+        return <ThreatResponsePlaybooks />;
       case "report-generator":
         return <ThreatIntelReportGenerator />;
       case "threat-hunt":
