@@ -9,6 +9,9 @@ interface BlueTeamActivityBarProps {
 const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBarProps) => {
   const items = [
     { id: "global-dashboard", icon: Activity, label: "Global Threat Dashboard" },
+    { id: "live-metrics", icon: BarChart3, label: "Live Metrics Dashboard" },
+    { id: "threat-scoring", icon: Calculator, label: "Threat Scoring" },
+    { id: "stix-taxii", icon: Share2, label: "STIX/TAXII Sharing" },
     { id: "threat-alerts", icon: Bell, label: "Threat Alerts" },
     { id: "kill-chain", icon: Zap, label: "Kill Chain Visualization" },
     { id: "attack-timeline", icon: Clock, label: "Attack Timeline" },
