@@ -1,4 +1,4 @@
-import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network, Crosshair, Layers, Zap, Users, Briefcase, Wifi, Clock, Share2, PlayCircle, Grid3X3, Link2 } from "lucide-react";
+import { Shield, Search, Eye, AlertTriangle, Activity, Database, Fingerprint, FileSearch, Lock, Bell, Radar, Bug, ShieldCheck, FileBarChart, Mail, Radio, GitBranch, Network, Crosshair, Layers, Zap, Users, Briefcase, Wifi, Clock, Share2, PlayCircle, Grid3X3, Link2, BarChart3, Calculator } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BlueTeamActivityBarProps {
