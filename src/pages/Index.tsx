@@ -6,6 +6,7 @@ import RightActivityBar from "@/components/editor/RightActivityBar";
 import RightPanel from "@/components/editor/RightPanel";
 import BlueTeamActivityBar from "@/components/editor/BlueTeamActivityBar";
 import BlueTeamPanel from "@/components/editor/BlueTeamPanel";
+import DiagnosticsToggle from "@/components/diagnostics/DiagnosticsToggle";
 import { ThemeName } from "@/lib/themes";
 
 const Index = () => {
@@ -47,6 +48,7 @@ const Index = () => {
         <RightActivityBar activePanel={activeRightPanel} onPanelChange={setActiveRightPanel} />
       </div>
       <StatusBar />
+      <DiagnosticsToggle />
     </div>
   );
 };
