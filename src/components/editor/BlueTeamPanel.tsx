@@ -36,6 +36,9 @@ const ThreatResponsePlaybooks = lazy(() => import("./ThreatResponsePlaybooks"));
 const AttackTimelineView = lazy(() => import("./AttackTimelineView"));
 const MitreHeatmap = lazy(() => import("./MitreHeatmap"));
 const ThreatCorrelationEngine = lazy(() => import("./ThreatCorrelationEngine"));
+const STIXTAXIIPanel = lazy(() => import("./STIXTAXIIPanel"));
+const ThreatScoringPanel = lazy(() => import("./ThreatScoringPanel"));
+const LiveMetricsDashboard = lazy(() => import("./LiveMetricsDashboard"));
 
 interface BlueTeamPanelProps {
   activePanel: string;
@@ -71,6 +74,12 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         return <MitreHeatmap />;
       case "correlation-engine":
         return <ThreatCorrelationEngine />;
+      case "stix-taxii":
+        return <STIXTAXIIPanel />;
+      case "threat-scoring":
+        return <ThreatScoringPanel />;
+      case "live-metrics":
+        return <LiveMetricsDashboard />;
       case "report-generator":
         return <ThreatIntelReportGenerator />;
       case "threat-hunt":

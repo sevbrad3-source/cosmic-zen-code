@@ -1,5 +1,5 @@
 import { X, ChevronUp, Plus, ChevronDown, Terminal as TerminalIcon, Activity, Radio } from "lucide-react";
-import { useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 const NetworkGraph = lazy(() => import("./NetworkGraph"));
 const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
@@ -9,6 +9,7 @@ const ReportGenerator = lazy(() => import("./ReportGenerator"));
 const AttackChainBuilder = lazy(() => import("./AttackChainBuilder"));
 const RedTeamReportGenerator = lazy(() => import("./RedTeamReportGenerator"));
 const LiveCollaborationPanel = lazy(() => import("./LiveCollaborationPanel"));
+const JointOperationsCenter = lazy(() => import("./JointOperationsCenter"));
 const Terminal = lazy(() => import("./Terminal"));
 const LogStream = lazy(() => import("./LogStream"));
 const ListenerPanel = lazy(() => import("./ListenerPanel"));
@@ -95,6 +96,13 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [bottomPanelHeight] = useState(220);
 
+  // Mapbox sometimes renders into a 0-sized container when switching tabs; nudge a resize.
+  useEffect(() => {
+    if (activeContent !== "geomap") return;
+    const t = window.setTimeout(() => window.dispatchEvent(new Event("resize")), 250);
+    return () => window.clearTimeout(t);
+  }, [activeContent]);
+
   const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content || "";
 
   const renderLineWithSyntax = (line: string, lineNumber: number) => {
@@ -135,6 +143,8 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
 
   const renderMainContent = () => {
     switch (activeContent) {
+      case "joc":
+        return <JointOperationsCenter />;
       case "network":
         return <NetworkGraph />;
       case "geomap":
@@ -145,11 +155,16 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
         return <AttackTimeline />;
       case "reports":
         return <ReportGenerator />;
-      case "attack-chain":
-        return <AttackChainBuilder />;
       case "red-report":
         return <RedTeamReportGenerator />;
       case "team-comms":
+        return <LiveCollaborationPanel />;
+      case "attack-chain":
+        return <AttackChainBuilder />;
+      // Backwards-compatible IDs (older TitleBar ids)
+      case "chain-builder":
+        return <AttackChainBuilder />;
+      case "collaboration":
         return <LiveCollaborationPanel />;
       default:
         return (

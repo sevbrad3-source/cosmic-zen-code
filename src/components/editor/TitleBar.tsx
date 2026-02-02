@@ -1,4 +1,4 @@
-import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu } from "lucide-react";
+import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,14 +17,15 @@ interface TitleBarProps {
 
 const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChange }: TitleBarProps) => {
   const mainContentOptions = [
+    { id: "joc", label: "Joint Ops Center", icon: Shield },
     { id: "editor", label: "Code Editor", icon: FileText },
     { id: "network", label: "Network Map", icon: Network },
     { id: "geomap", label: "Geographic Map", icon: Globe },
     { id: "exploits", label: "Exploit Flow", icon: Zap },
     { id: "timeline", label: "Attack Timeline", icon: Clock },
-    { id: "chain-builder", label: "Attack Chain", icon: Link },
-    { id: "reports", label: "Red Team Report", icon: FileBarChart },
-    { id: "collaboration", label: "Team Comms", icon: Network },
+    { id: "attack-chain", label: "Attack Chain", icon: Link },
+    { id: "reports", label: "Reports", icon: FileBarChart },
+    { id: "team-comms", label: "Team Comms", icon: Network },
   ];
 
   const specializedTools = [
