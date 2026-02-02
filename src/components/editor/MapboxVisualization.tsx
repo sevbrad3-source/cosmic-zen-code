@@ -5,6 +5,7 @@ import { Shield, AlertTriangle, MapPin, Crosshair, Wifi, Server } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { diagnostics } from '@/lib/diagnostics';
 
 const MapboxVisualization = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -21,12 +22,15 @@ const MapboxVisualization = () => {
   });
 
   useEffect(() => {
+    diagnostics.logMapbox('Component mounted');
     const getMapboxToken = async () => {
+      diagnostics.logMapbox('Fetching token from edge function...');
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
 
         if (error) {
-          console.error('Error fetching Mapbox token:', error);
+          diagnostics.logMapbox('Token fetch error', error);
+          console.error('[Mapbox] Error fetching Mapbox token:', error);
           setMapError("Failed to load map configuration");
           toast.error("Failed to load map configuration");
           setLoading(false);
@@ -34,15 +38,18 @@ const MapboxVisualization = () => {
         }
 
         if (data?.token) {
+          diagnostics.logMapbox('Token received', { tokenLength: data.token.length, prefix: data.token.slice(0, 10) });
           setMapError(null);
           setLoading(true);
           setMapboxToken(data.token);
         } else {
+          diagnostics.logMapbox('Token missing in response', data);
           setMapError("Map token missing");
           setLoading(false);
         }
       } catch (err) {
-        console.error('Exception fetching Mapbox token:', err);
+        diagnostics.logMapbox('Token fetch exception', err);
+        console.error('[Mapbox] Exception fetching Mapbox token:', err);
         setMapError("Failed to initialize map");
         toast.error("Failed to initialize map");
         setLoading(false);
@@ -53,14 +60,20 @@ const MapboxVisualization = () => {
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken) {
+      diagnostics.logMapbox('Skipping init', { hasContainer: !!mapContainer.current, hasToken: !!mapboxToken });
+      return;
+    }
 
     const container = mapContainer.current;
+    const rect = container.getBoundingClientRect();
+    diagnostics.logMapbox('Container dimensions', { width: rect.width, height: rect.height, visible: rect.width > 0 && rect.height > 0 });
 
     // ensure we don't keep a half-initialized instance around
     if (map.current) {
       try {
         map.current.remove();
+        diagnostics.logMapbox('Removed previous map instance');
       } catch {
         // ignore
       }
@@ -72,6 +85,16 @@ const MapboxVisualization = () => {
 
     // Small delay to ensure container is sized
     const initTimeout = setTimeout(() => {
+      const finalRect = container.getBoundingClientRect();
+      diagnostics.logMapbox('Initializing map', { containerWidth: finalRect.width, containerHeight: finalRect.height });
+
+      if (finalRect.width === 0 || finalRect.height === 0) {
+        diagnostics.logMapbox('Container has zero dimensions - map will fail');
+        setMapError('Map container has zero dimensions');
+        setLoading(false);
+        return;
+      }
+
       try {
         mapboxgl.accessToken = mapboxToken;
 
@@ -84,9 +107,12 @@ const MapboxVisualization = () => {
           pitch: 45,
         });
 
+        diagnostics.logMapbox('Map instance created, waiting for load event...');
+
         // If we never reach 'load', don't leave the UI stuck forever
         const failSafe = window.setTimeout(() => {
           if (loading) {
+            diagnostics.logMapbox('Load timeout - map stuck initializing', { elapsed: '12s' });
             console.error('[Mapbox] load timeout: map stuck initializing');
             setMapError('Map failed to load (timeout).');
             setLoading(false);
@@ -100,6 +126,7 @@ const MapboxVisualization = () => {
         }, 12000);
 
         map.current.on('error', (e) => {
+          diagnostics.logMapbox('Error event fired', { error: e?.error?.message || e });
           console.error('[Mapbox] error event', e?.error || e);
           window.clearTimeout(failSafe);
           setMapError('Map failed to load (error).');
@@ -120,6 +147,7 @@ const MapboxVisualization = () => {
         );
 
         map.current.on('style.load', () => {
+          diagnostics.logMapbox('Style loaded');
           map.current?.setFog({
             color: 'rgb(5, 5, 8)',
             'high-color': 'rgb(20, 5, 10)',
@@ -161,11 +189,13 @@ const MapboxVisualization = () => {
 
         map.current.on('load', () => {
           window.clearTimeout(failSafe);
+          diagnostics.logMapbox('Map load event fired - SUCCESS');
 
           // Force a resize after mount/layout to avoid permanent blank canvas
           try {
             map.current?.resize();
             window.setTimeout(() => map.current?.resize(), 250);
+            diagnostics.logMapbox('Map resized');
           } catch {
             // ignore
           }
