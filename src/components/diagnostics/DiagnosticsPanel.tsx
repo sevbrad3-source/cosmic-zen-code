@@ -16,19 +16,22 @@ import {
   X,
   Maximize2,
   Minimize2,
-  RefreshCw,
   Eye,
   EyeOff,
   Filter,
   Clock,
   Zap,
   Map,
+  Gauge,
+  RotateCcw,
 } from 'lucide-react';
 import { diagnostics, DiagnosticLog } from '@/lib/diagnostics';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PerformanceProfiler } from './PerformanceProfiler';
+import { NetworkReplayPanel } from './NetworkReplayPanel';
 
 interface DiagnosticsPanelProps {
   isOpen: boolean;
@@ -413,6 +416,14 @@ export const DiagnosticsPanel = ({ isOpen, onClose }: DiagnosticsPanelProps) => 
         <TabsList className="mx-2 mt-2 bg-neutral-900 border border-neutral-800">
           <TabsTrigger value="console" className="text-xs">Console</TabsTrigger>
           <TabsTrigger value="network" className="text-xs">Network</TabsTrigger>
+          <TabsTrigger value="replay" className="text-xs flex items-center gap-1">
+            <RotateCcw className="w-3 h-3" />
+            Replay
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="text-xs flex items-center gap-1">
+            <Gauge className="w-3 h-3" />
+            Profiler
+          </TabsTrigger>
           <TabsTrigger value="lifecycle" className="text-xs">Lifecycle</TabsTrigger>
           <TabsTrigger value="system" className="text-xs">System</TabsTrigger>
         </TabsList>
@@ -460,6 +471,14 @@ export const DiagnosticsPanel = ({ isOpen, onClose }: DiagnosticsPanelProps) => 
           <ScrollArea className="h-full">
             <NetworkPanel />
           </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="replay" className="flex-1 overflow-hidden m-0 p-0">
+          <NetworkReplayPanel />
+        </TabsContent>
+
+        <TabsContent value="performance" className="flex-1 overflow-hidden m-0 p-0">
+          <PerformanceProfiler />
         </TabsContent>
 
         <TabsContent value="lifecycle" className="flex-1 overflow-hidden m-0 p-0">
