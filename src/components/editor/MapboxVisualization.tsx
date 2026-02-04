@@ -5,9 +5,10 @@ import { Shield, AlertTriangle, MapPin, Crosshair, Wifi, Server } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { diagnostics } from '@/lib/diagnostics';
+import { diagnostics, useProfiler } from '@/lib/diagnostics';
 
 const MapboxVisualization = () => {
+  const profiler = useProfiler("MapboxVisualization");
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>("");
@@ -19,6 +20,11 @@ const MapboxVisualization = () => {
     c2Servers: 3,
     proxyNodes: 8,
     dataExfil: '2.4 GB'
+  });
+
+  // Track render performance
+  useEffect(() => {
+    profiler.endRender();
   });
 
   useEffect(() => {

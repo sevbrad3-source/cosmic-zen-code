@@ -1,5 +1,7 @@
 import { X, ChevronUp, Plus, ChevronDown, Terminal as TerminalIcon, Activity, Radio } from "lucide-react";
 import { useEffect, useState, lazy, Suspense } from "react";
+import { useProfiler } from "@/lib/diagnostics";
+import { ErrorBoundary } from "@/components/diagnostics/ErrorBoundary";
 
 const NetworkGraph = lazy(() => import("./NetworkGraph"));
 const MapboxVisualization = lazy(() => import("./MapboxVisualization"));
@@ -92,9 +94,15 @@ interface EditorAreaProps {
 }
 
 const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: EditorAreaProps) => {
+  const profiler = useProfiler("EditorArea");
   const [tabs] = useState<Tab[]>(mockTabs);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [bottomPanelHeight] = useState(220);
+
+  // Track render performance
+  useEffect(() => {
+    profiler.endRender();
+  });
 
   // Mapbox sometimes renders into a 0-sized container when switching tabs; nudge a resize.
   useEffect(() => {
@@ -146,9 +154,11 @@ const EditorArea = ({ activeContent, onBottomPanelChange, activeBottomPanel }: E
       case "joc":
         return <JointOperationsCenter />;
       case "network":
-        return <NetworkGraph />;
+        return <ErrorBoundary componentName="NetworkGraph"><NetworkGraph /></ErrorBoundary>;
       case "geomap":
-        return <MapboxVisualization />;
+        return <ErrorBoundary componentName="MapboxVisualization"><MapboxVisualization /></ErrorBoundary>;
+      case "exploits":
+        return <ErrorBoundary componentName="ExploitFlow"><ExploitFlow /></ErrorBoundary>;
       case "exploits":
         return <ExploitFlow />;
       case "timeline":

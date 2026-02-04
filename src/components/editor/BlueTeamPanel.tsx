@@ -1,6 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { X, Shield } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useProfiler } from "@/lib/diagnostics";
+import { ErrorBoundary } from "@/components/diagnostics/ErrorBoundary";
 
 const ThreatHuntingPanel = lazy(() => import("./ThreatHuntingPanel"));
 const DetectionEngineeringPanel = lazy(() => import("./DetectionEngineeringPanel"));
@@ -54,6 +56,13 @@ const PanelSkeleton = () => (
 );
 
 const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
+  const profiler = useProfiler("BlueTeamPanel");
+
+  // Track render performance
+  useEffect(() => {
+    profiler.endRender();
+  });
+
   if (!activePanel) return null;
 
   const renderPanel = () => {
@@ -159,9 +168,11 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
         </button>
       </div>
       <ScrollArea className="flex-1">
-        <Suspense fallback={<PanelSkeleton />}>
-          {renderPanel()}
-        </Suspense>
+        <ErrorBoundary componentName={`BlueTeam-${activePanel}`}>
+          <Suspense fallback={<PanelSkeleton />}>
+            {renderPanel()}
+          </Suspense>
+        </ErrorBoundary>
       </ScrollArea>
     </div>
   );
