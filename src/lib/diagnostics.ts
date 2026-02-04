@@ -57,6 +57,15 @@ export interface RenderMetric {
   trend: 'up' | 'down' | 'stable';
 }
 
+export interface MemoryLeakSuspect {
+  component: string;
+  mountCount: number;
+  unmountCount: number;
+  leakScore: number; // Higher = more likely leak
+  lastMounted: number;
+  pattern: 'accumulating' | 'orphaned' | 'rapid-remount' | 'normal';
+}
+
 class DiagnosticsEngine {
   private logs: DiagnosticLog[] = [];
   private metrics: PerformanceMetric[] = [];
@@ -64,6 +73,7 @@ class DiagnosticsEngine {
   private networkRequests: NetworkRequest[] = [];
   private componentCrashes: ComponentCrash[] = [];
   private renderMetrics: Map<string, RenderMetric> = new Map();
+  private mountTracking: Map<string, { mounts: number; unmounts: number; lastMount: number; mountTimes: number[] }> = new Map();
   private listeners: Set<() => void> = new Set();
   private maxLogs = 500;
   private originalConsole: Partial<Console> = {};
@@ -208,6 +218,95 @@ class DiagnosticsEngine {
     if (this.lifecycle.length > 200) {
       this.lifecycle = this.lifecycle.slice(0, 200);
     }
+
+    // Track mount/unmount for leak detection
+    this.trackMountUnmount(event.component, event.event);
+
+    this.notify();
+  }
+
+  private trackMountUnmount(component: string, event: 'mount' | 'unmount' | 'update' | 'error') {
+    if (event !== 'mount' && event !== 'unmount') return;
+
+    const tracking = this.mountTracking.get(component) || {
+      mounts: 0,
+      unmounts: 0,
+      lastMount: 0,
+      mountTimes: [],
+    };
+
+    const now = Date.now();
+
+    if (event === 'mount') {
+      tracking.mounts++;
+      tracking.lastMount = now;
+      tracking.mountTimes.push(now);
+      // Keep only last 20 mount times
+      if (tracking.mountTimes.length > 20) {
+        tracking.mountTimes = tracking.mountTimes.slice(-20);
+      }
+    } else {
+      tracking.unmounts++;
+    }
+
+    this.mountTracking.set(component, tracking);
+  }
+
+  getMemoryLeakSuspects(): MemoryLeakSuspect[] {
+    const suspects: MemoryLeakSuspect[] = [];
+    const now = Date.now();
+
+    this.mountTracking.forEach((tracking, component) => {
+      const { mounts, unmounts, lastMount, mountTimes } = tracking;
+      
+      let leakScore = 0;
+      let pattern: MemoryLeakSuspect['pattern'] = 'normal';
+
+      // Check for orphaned components (mounted but never unmounted)
+      const orphanedCount = mounts - unmounts;
+      if (orphanedCount > 3) {
+        leakScore += orphanedCount * 10;
+        pattern = 'orphaned';
+      }
+
+      // Check for rapid remounting (indicates potential infinite loop)
+      if (mountTimes.length >= 5) {
+        const recentMounts = mountTimes.slice(-5);
+        const timeDiff = recentMounts[recentMounts.length - 1] - recentMounts[0];
+        if (timeDiff < 2000) { // 5 mounts in 2 seconds
+          leakScore += 50;
+          pattern = 'rapid-remount';
+        }
+      }
+
+      // Check for accumulating instances
+      if (mounts > 10 && orphanedCount > mounts * 0.3) {
+        leakScore += 30;
+        pattern = 'accumulating';
+      }
+
+      // Stale mounted components (mounted long ago, never unmounted)
+      if (orphanedCount > 0 && now - lastMount > 60000) {
+        leakScore += 15;
+      }
+
+      if (leakScore > 0) {
+        suspects.push({
+          component,
+          mountCount: mounts,
+          unmountCount: unmounts,
+          leakScore,
+          lastMounted: lastMount,
+          pattern,
+        });
+      }
+    });
+
+    return suspects.sort((a, b) => b.leakScore - a.leakScore);
+  }
+
+  clearLeakTracking() {
+    this.mountTracking.clear();
     this.notify();
   }
 

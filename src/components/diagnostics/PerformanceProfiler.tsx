@@ -1,5 +1,5 @@
-import { useState, useEffect, useSyncExternalStore } from 'react';
-import { diagnostics } from '@/lib/diagnostics';
+import { useState, useSyncExternalStore } from 'react';
+import { diagnostics, MemoryLeakSuspect } from '@/lib/diagnostics';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,9 @@ import {
   Minus,
   ChevronRight,
   ChevronDown,
-  Activity
+  Activity,
+  AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 
 interface RenderMetric {
@@ -116,6 +118,11 @@ export const PerformanceProfiler = () => {
   const performanceMetrics = useSyncExternalStore(
     (cb) => diagnostics.subscribe(cb),
     () => diagnostics.getMetrics()
+  );
+
+  const memoryLeakSuspects = useSyncExternalStore(
+    (cb) => diagnostics.subscribe(cb),
+    () => diagnostics.getMemoryLeakSuspects()
   );
 
   // Build component tree from metrics
@@ -224,8 +231,44 @@ export const PerformanceProfiler = () => {
           </ScrollArea>
         </div>
 
-        {/* Right Panel - Crashes & Core Web Vitals */}
+        {/* Right Panel - Leaks, Crashes & Core Web Vitals */}
         <div className="w-64 flex flex-col">
+          {/* Memory Leak Detector */}
+          <div className="border-b border-neutral-800">
+            <div className="px-3 py-2 border-b border-neutral-800 bg-neutral-900/20 flex items-center justify-between">
+              <span className="text-xs font-semibold text-neutral-400">Memory Leaks</span>
+              <div className="flex items-center gap-1">
+                {memoryLeakSuspects.length > 0 && (
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-orange-500 text-orange-400">
+                    {memoryLeakSuspects.length} suspects
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-5 h-5"
+                  onClick={() => diagnostics.clearLeakTracking()}
+                  title="Clear tracking"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+            <ScrollArea className="h-36">
+              {memoryLeakSuspects.length === 0 ? (
+                <div className="p-3 text-center text-neutral-600 text-[10px]">
+                  No leaks detected
+                </div>
+              ) : (
+                <div className="divide-y divide-neutral-800">
+                  {memoryLeakSuspects.slice(0, 10).map((suspect, i) => (
+                    <MemoryLeakItem key={i} suspect={suspect} />
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+
           {/* Component Crashes */}
           <div className="border-b border-neutral-800">
             <div className="px-3 py-2 border-b border-neutral-800 bg-neutral-900/20 flex items-center justify-between">
@@ -236,7 +279,7 @@ export const PerformanceProfiler = () => {
                 </Badge>
               )}
             </div>
-            <ScrollArea className="h-32">
+            <ScrollArea className="h-28">
               {componentCrashes.length === 0 ? (
                 <div className="p-3 text-center text-neutral-600 text-[10px]">
                   No crashes recorded
@@ -262,13 +305,13 @@ export const PerformanceProfiler = () => {
               <span className="text-xs font-semibold text-neutral-400">Core Web Vitals</span>
             </div>
             <ScrollArea className="h-[calc(100%-32px)]">
-              <div className="p-3 space-y-3">
+              <div className="p-3 space-y-2">
                 {performanceMetrics.length === 0 ? (
                   <div className="text-center text-neutral-600 text-[10px]">
                     Collecting metrics...
                   </div>
                 ) : (
-                  performanceMetrics.slice(0, 6).map((metric, i) => (
+                  performanceMetrics.slice(0, 4).map((metric, i) => (
                     <div key={i} className="bg-neutral-900 rounded p-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-neutral-400 uppercase">{metric.name}</span>
@@ -286,6 +329,36 @@ export const PerformanceProfiler = () => {
             </ScrollArea>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const MemoryLeakItem = ({ suspect }: { suspect: MemoryLeakSuspect }) => {
+  const getPatternColor = (pattern: MemoryLeakSuspect['pattern']) => {
+    switch (pattern) {
+      case 'rapid-remount': return 'text-red-400 border-red-500';
+      case 'orphaned': return 'text-orange-400 border-orange-500';
+      case 'accumulating': return 'text-yellow-400 border-yellow-500';
+      default: return 'text-neutral-400 border-neutral-500';
+    }
+  };
+
+  const orphaned = suspect.mountCount - suspect.unmountCount;
+
+  return (
+    <div className="px-3 py-2 hover:bg-neutral-900/50">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className={`w-3 h-3 ${suspect.leakScore > 30 ? 'text-red-400' : 'text-orange-400'}`} />
+        <span className="text-[10px] font-mono text-neutral-300 truncate flex-1">{suspect.component}</span>
+        <Badge variant="outline" className={`text-[8px] px-1 py-0 ${getPatternColor(suspect.pattern)}`}>
+          {suspect.pattern}
+        </Badge>
+      </div>
+      <div className="flex items-center gap-3 mt-1 text-[9px] text-neutral-500">
+        <span>↑{suspect.mountCount} ↓{suspect.unmountCount}</span>
+        {orphaned > 0 && <span className="text-orange-400">+{orphaned} orphaned</span>}
+        <span className="ml-auto">Score: {suspect.leakScore}</span>
       </div>
     </div>
   );
