@@ -1,6 +1,8 @@
 // Advanced Diagnostics Engine
 // Captures console logs, network requests, component lifecycle, and performance metrics
 
+import React from 'react';
+
 export interface DiagnosticLog {
   id: string;
   timestamp: number;
@@ -34,6 +36,25 @@ export interface NetworkRequest {
   endTime: number | null;
   duration: number | null;
   error?: string;
+  requestHeaders?: Record<string, string>;
+  requestBody?: string;
+}
+
+export interface ComponentCrash {
+  component: string;
+  error: string;
+  stack: string;
+  componentStack: string;
+  timestamp: number;
+}
+
+export interface RenderMetric {
+  component: string;
+  renderCount: number;
+  totalTime: number;
+  avgTime: number;
+  lastRenderTime: number;
+  trend: 'up' | 'down' | 'stable';
 }
 
 class DiagnosticsEngine {
@@ -41,6 +62,8 @@ class DiagnosticsEngine {
   private metrics: PerformanceMetric[] = [];
   private lifecycle: ComponentLifecycle[] = [];
   private networkRequests: NetworkRequest[] = [];
+  private componentCrashes: ComponentCrash[] = [];
+  private renderMetrics: Map<string, RenderMetric> = new Map();
   private listeners: Set<() => void> = new Set();
   private maxLogs = 500;
   private originalConsole: Partial<Console> = {};
@@ -285,11 +308,59 @@ class DiagnosticsEngine {
     this.listeners.forEach((listener) => listener());
   }
 
+  // Component crash tracking
+  addComponentCrash(crash: ComponentCrash) {
+    this.componentCrashes.unshift(crash);
+    if (this.componentCrashes.length > 50) {
+      this.componentCrashes = this.componentCrashes.slice(0, 50);
+    }
+    this.notify();
+  }
+
+  getComponentCrashes() {
+    return this.componentCrashes;
+  }
+
+  // Render metrics tracking
+  trackRender(component: string, renderTime: number) {
+    const existing = this.renderMetrics.get(component);
+    if (existing) {
+      const previousAvg = existing.avgTime;
+      existing.renderCount++;
+      existing.totalTime += renderTime;
+      existing.avgTime = existing.totalTime / existing.renderCount;
+      existing.lastRenderTime = renderTime;
+      existing.trend = existing.avgTime > previousAvg * 1.1 ? 'up' : 
+                       existing.avgTime < previousAvg * 0.9 ? 'down' : 'stable';
+    } else {
+      this.renderMetrics.set(component, {
+        component,
+        renderCount: 1,
+        totalTime: renderTime,
+        avgTime: renderTime,
+        lastRenderTime: renderTime,
+        trend: 'stable',
+      });
+    }
+    this.notify();
+  }
+
+  getRenderMetrics(): RenderMetric[] {
+    return Array.from(this.renderMetrics.values()).sort((a, b) => b.renderCount - a.renderCount);
+  }
+
+  clearRenderMetrics() {
+    this.renderMetrics.clear();
+    this.notify();
+  }
+
   clear() {
     this.logs = [];
     this.metrics = [];
     this.lifecycle = [];
     this.networkRequests = [];
+    this.componentCrashes = [];
+    this.renderMetrics.clear();
     this.notify();
   }
 
@@ -301,6 +372,8 @@ class DiagnosticsEngine {
       metrics: this.metrics,
       lifecycle: this.lifecycle,
       networkRequests: this.networkRequests,
+      componentCrashes: this.componentCrashes,
+      renderMetrics: this.getRenderMetrics(),
     };
   }
 }
@@ -327,4 +400,31 @@ export function useComponentDiagnostics(componentName: string) {
   };
 
   return { trackMount, trackUnmount, trackError };
+}
+
+// React hook for performance profiling
+export function useProfiler(componentName: string) {
+  const startTime = performance.now();
+
+  return {
+    endRender: () => {
+      const renderTime = performance.now() - startTime;
+      diagnostics.trackRender(componentName, renderTime);
+    },
+  };
+}
+
+// HOC for automatic render tracking
+export function withProfiler<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  componentName: string
+) {
+  return function ProfiledComponent(props: P) {
+    const profiler = useProfiler(componentName);
+    
+    // Track render on each render
+    profiler.endRender();
+
+    return React.createElement(WrappedComponent, props);
+  };
 }
