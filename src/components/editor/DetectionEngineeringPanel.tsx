@@ -63,10 +63,10 @@ level: critical`;
 
   return (
     <div className="p-3 space-y-4 text-[hsl(210,100%,85%)]">
-      {/* Safety Banner */}
-      <div className="bg-[hsl(210,100%,15%)] border border-[hsl(210,100%,30%)] rounded p-2 flex items-center gap-2">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-2">
         <Code className="w-4 h-4 text-[hsl(210,100%,60%)]" />
-        <span className="text-xs text-[hsl(210,100%,70%)]">DETECTION ENGINEERING - Rule Development Lab</span>
+        <span className="text-xs font-semibold text-[hsl(210,100%,70%)]">Detection Engineering</span>
       </div>
 
       {/* Rule Library */}

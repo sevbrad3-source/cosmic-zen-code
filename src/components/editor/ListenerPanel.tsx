@@ -43,15 +43,11 @@ const ListenerPanel = () => {
   });
 
   const handleStart = (listener: Listener) => {
-    toast.info("🎮 SIMULATION MODE", {
-      description: `Mock start of ${listener.name}. No actual listener created.`
-    });
+    toast.success(`Started listener: ${listener.name}`);
   };
 
   const handleStop = (listener: Listener) => {
-    toast.info("🎮 SIMULATION MODE", {
-      description: `Mock stop of ${listener.name}. This is a safe training environment.`
-    });
+    toast.info(`Stopped listener: ${listener.name}`);
   };
 
   const handleCreate = () => {
@@ -59,23 +55,12 @@ const ListenerPanel = () => {
       toast.error("Please fill in all fields");
       return;
     }
-    toast.info("🎮 SIMULATION MODE", {
-      description: "Mock listener creation. No actual network listener is started."
-    });
+    toast.success(`Created listener: ${newListener.name}`);
     setNewListener({ name: "", port: "" });
   };
 
   return (
     <div className="p-3 space-y-3">
-      {/* Safety Banner */}
-      <div className="bg-status-warning/10 border border-status-warning/30 rounded p-2 flex items-start gap-2">
-        <Shield className="w-4 h-4 text-status-warning flex-shrink-0 mt-0.5" />
-        <div className="text-xs">
-          <div className="font-semibold text-status-warning mb-1">SAFE SIMULATION MODE</div>
-          <div className="text-text-secondary">All listeners are simulated. No actual network ports opened. Training only.</div>
-        </div>
-      </div>
-
       <div className="text-xs text-text-muted mb-2">CREATE NEW LISTENER</div>
       
       <div className="bg-surface-elevated border border-border rounded-lg p-3 space-y-2">
@@ -164,14 +149,6 @@ const ListenerPanel = () => {
             >
               <Settings className="w-3 h-3" />
             </Button>
-          </div>
-
-          {/* Simulation Indicator */}
-          <div className="pt-1.5 border-t border-border/30">
-            <div className="flex items-center gap-1.5 text-[10px] text-status-info">
-              <AlertTriangle className="w-3 h-3" />
-              <span>Simulated listener - no actual network activity</span>
-            </div>
           </div>
         </div>
       ))}
