@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect } from "react";
-import { X, Shield } from "lucide-react";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { X, Shield, Search, AlertTriangle, FileSearch, Network, Activity, Eye, Database, Radar, BookOpen, Users, BarChart3 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProfiler } from "@/lib/diagnostics";
 import { ErrorBoundary } from "@/components/diagnostics/ErrorBoundary";
+import PanelTabNav, { PanelTab } from "./PanelTabNav";
 
 const ThreatHuntingPanel = lazy(() => import("./ThreatHuntingPanel"));
 const DetectionEngineeringPanel = lazy(() => import("./DetectionEngineeringPanel"));
@@ -55,8 +56,82 @@ const PanelSkeleton = () => (
   </div>
 );
 
+// Panel tab categories
+const panelTabs: PanelTab[] = [
+  { id: "overview", icon: BarChart3, label: "Overview" },
+  { id: "hunt", icon: Search, label: "Threat Hunting" },
+  { id: "alerts", icon: AlertTriangle, label: "Alerts & Incidents" },
+  { id: "intel", icon: Eye, label: "Threat Intel" },
+  { id: "forensics", icon: FileSearch, label: "Forensics" },
+  { id: "network", icon: Network, label: "Network" },
+  { id: "assets", icon: Database, label: "Assets" },
+  { id: "detection", icon: Radar, label: "Detection" },
+  { id: "playbooks", icon: BookOpen, label: "Playbooks" },
+  { id: "collab", icon: Users, label: "Collaboration" },
+];
+
+// Map active panels to their tab category
+const getPanelCategory = (panel: string): string => {
+  const categoryMap: Record<string, string> = {
+    // Overview
+    "global-dashboard": "overview",
+    "live-metrics": "overview",
+    "soc-dashboard": "overview",
+    // Threat Hunting
+    "threat-hunt": "hunt",
+    "correlation-engine": "hunt",
+    "mitre-heatmap": "hunt",
+    // Alerts & Incidents
+    "threat-alerts": "alerts",
+    "alerts": "alerts",
+    "incident-response": "alerts",
+    // Intel
+    "threat-intel": "intel",
+    "threat-actors": "intel",
+    "stix-taxii": "intel",
+    "threat-scoring": "intel",
+    "actor-graph": "intel",
+    "report-generator": "intel",
+    // Forensics
+    "forensics": "forensics",
+    "log-analysis": "forensics",
+    "investigations": "forensics",
+    "attack-timeline": "forensics",
+    "kill-chain": "forensics",
+    // Network
+    "network-defense": "network",
+    "attack-path": "network",
+    "asset-discovery": "network",
+    // Assets
+    "vuln-management": "assets",
+    "security-controls": "assets",
+    "honeypot": "assets",
+    "deception": "assets",
+    // Detection
+    "detection-eng": "detection",
+    "siem": "detection",
+    "ioc-manager": "detection",
+    // Playbooks
+    "playbooks": "playbooks",
+    "response-playbooks": "playbooks",
+    "threat-modeling": "playbooks",
+    // Collaboration
+    "purple-team": "collab",
+    "campaigns": "collab",
+    "secure-comms": "collab",
+    "social-eng-defense": "collab",
+  };
+  return categoryMap[panel] || "overview";
+};
+
 const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
   const profiler = useProfiler("BlueTeamPanel");
+  const [activeTab, setActiveTab] = useState(() => getPanelCategory(activePanel));
+
+  // Update active tab when panel changes
+  useEffect(() => {
+    setActiveTab(getPanelCategory(activePanel));
+  }, [activePanel]);
 
   // Track render performance
   useEffect(() => {
@@ -167,6 +242,15 @@ const BlueTeamPanel = ({ activePanel, onClose }: BlueTeamPanelProps) => {
           <X className="w-4 h-4 text-[hsl(210,60%,50%)]" />
         </button>
       </div>
+      
+      {/* Tab Navigation */}
+      <PanelTabNav
+        tabs={panelTabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        variant="blue"
+      />
+      
       <ScrollArea className="flex-1">
         <ErrorBoundary componentName={`BlueTeam-${activePanel}`}>
           <Suspense fallback={<PanelSkeleton />}>

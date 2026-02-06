@@ -322,15 +322,6 @@ const LiveCollaborationPanel = () => {
           </div>
         </div>
 
-        {/* Safety Banner */}
-        <div className="px-4 py-2 bg-status-warning/10 border-b border-status-warning/30 flex items-center gap-2">
-          <AlertTriangle className="w-3.5 h-3.5 text-status-warning" />
-          <span className="text-[10px] text-status-warning">
-            <span className="font-semibold">SIMULATION EXERCISE</span>
-            <span className="text-text-muted ml-1">All communications are part of the training scenario.</span>
-          </span>
-        </div>
-
         {/* Messages */}
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">

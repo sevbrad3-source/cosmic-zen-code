@@ -36,23 +36,11 @@ const LateralMovementPanel = () => {
     const source = hosts.find(h => h.id === sourceHost);
     const target = hosts.find(h => h.id === targetHost);
 
-    toast.info("🎮 SIMULATION MODE", {
-      description: `Mock lateral movement from ${source?.hostname} to ${target?.hostname}. No actual network compromise occurs. Training only.`,
-      duration: 5000
-    });
+    toast.success(`Initiating lateral movement from ${source?.hostname} to ${target?.hostname} via ${technique}`);
   };
 
   return (
     <div className="p-3 space-y-3">
-      {/* Critical Safety Banner */}
-      <div className="bg-status-error/10 border border-status-error/30 rounded p-2 flex items-start gap-2">
-        <Shield className="w-4 h-4 text-status-error flex-shrink-0 mt-0.5" />
-        <div className="text-xs">
-          <div className="font-semibold text-status-error mb-1">CRITICAL: SIMULATION ONLY</div>
-          <div className="text-text-secondary">All lateral movement is simulated. No actual network pivoting or credential attacks occur. Educational purposes exclusively.</div>
-        </div>
-      </div>
-
       <div className="text-xs text-text-muted mb-2">NETWORK TOPOLOGY</div>
 
       {/* Network Map */}
@@ -75,7 +63,7 @@ const LateralMovementPanel = () => {
                   </span>
                   {host.compromised && (
                     <Badge variant="outline" className="text-[9px] px-1 py-0 text-status-error">
-                      COMPROMISED (Mock)
+                      COMPROMISED
                     </Badge>
                   )}
                 </div>

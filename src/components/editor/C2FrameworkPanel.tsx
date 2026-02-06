@@ -75,14 +75,6 @@ const C2FrameworkPanel = () => {
 
   return (
     <div className="h-full flex flex-col bg-panel-bg text-text-primary overflow-hidden">
-      {/* Safety Banner */}
-      <div className="bg-purple-900/20 border-b border-purple-700/50 px-4 py-2 flex items-center gap-2">
-        <AlertTriangle className="w-4 h-4 text-purple-500" />
-        <span className="text-xs text-purple-400 font-medium">
-          SIMULATION MODE: C2 Framework Training Environment - Mock Command & Control Only
-        </span>
-      </div>
-
       {/* Header */}
       <div className="border-b border-panel-border px-4 py-3">
         <div className="flex items-center gap-2 mb-2">
@@ -325,10 +317,10 @@ const C2FrameworkPanel = () => {
       {/* Footer */}
       <div className="border-t border-panel-border px-4 py-2 bg-statusbar-bg">
         <div className="flex items-center justify-between text-xs text-text-muted">
-          <span>C2 Server: 0.0.0.0:443 (Training Mode)</span>
+          <span>C2 Server: 0.0.0.0:443</span>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-green-400">Simulation Active</span>
+            <span className="text-green-400">Active</span>
           </div>
         </div>
       </div>

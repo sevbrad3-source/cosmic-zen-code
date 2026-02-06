@@ -38,14 +38,6 @@ const NetworkDefensePanel = () => {
           </Badge>
         </div>
 
-        {/* Safety Banner */}
-        <div className="bg-[hsl(210,100%,10%)] border border-[hsl(210,100%,25%)] rounded-lg p-2 flex items-start gap-2">
-          <Shield className="w-4 h-4 text-[hsl(210,100%,60%)] flex-shrink-0 mt-0.5" />
-          <div className="text-[10px] text-[hsl(210,60%,60%)]">
-            <span className="font-semibold text-[hsl(210,100%,70%)]">SIMULATION</span> — Network defense training environment
-          </div>
-        </div>
-
         {/* Network Segments */}
         <div className="space-y-2">
           <span className="text-[10px] font-semibold text-[hsl(210,60%,50%)] uppercase tracking-wider">Network Segments</span>
