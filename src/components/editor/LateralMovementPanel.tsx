@@ -1,10 +1,18 @@
-import { Shield, AlertTriangle, ArrowRight, Key, Share2, Network } from "lucide-react";
+import { useState, lazy, Suspense } from "react";
+import { Network, ArrowRight, Key, Target, Map, Shield } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
+import InnerPanelTabs, { InnerTab } from "./InnerPanelTabs";
+
+const tabs: InnerTab[] = [
+  { id: "topology", icon: Map, label: "Topology" },
+  { id: "movement", icon: ArrowRight, label: "Movement" },
+  { id: "credentials", icon: Key, label: "Credentials" },
+  { id: "techniques", icon: Shield, label: "Techniques" },
+];
 
 interface Host {
   id: string;
@@ -14,200 +22,160 @@ interface Host {
   compromised: boolean;
 }
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="w-6 h-6 border-2 border-[hsl(0,100%,40%)] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 const LateralMovementPanel = () => {
+  const [activeTab, setActiveTab] = useState("topology");
   const [hosts] = useState<Host[]>([
     { id: "host1", ip: "192.168.1.10", hostname: "DC01", os: "Windows Server 2019", compromised: true },
     { id: "host2", ip: "192.168.1.15", hostname: "WEB01", os: "Ubuntu 20.04", compromised: false },
     { id: "host3", ip: "192.168.1.20", hostname: "DB01", os: "Windows Server 2016", compromised: false },
     { id: "host4", ip: "192.168.1.25", hostname: "FILE01", os: "Windows 10", compromised: false },
+    { id: "host5", ip: "192.168.1.30", hostname: "MAIL01", os: "CentOS 8", compromised: true },
   ]);
 
   const [sourceHost, setSourceHost] = useState("");
   const [targetHost, setTargetHost] = useState("");
   const [technique, setTechnique] = useState("");
-  const [credentials, setCredentials] = useState("");
 
-  const handleMove = () => {
-    if (!sourceHost || !targetHost || !technique) {
-      toast.error("Please configure all movement parameters");
-      return;
+  const techniques = [
+    { id: "pth", name: "Pass-the-Hash", mitre: "T1550.002", risk: "high" },
+    { id: "ptt", name: "Pass-the-Ticket", mitre: "T1550.003", risk: "high" },
+    { id: "psexec", name: "PsExec", mitre: "T1569.002", risk: "medium" },
+    { id: "wmi", name: "WMI Execution", mitre: "T1047", risk: "medium" },
+    { id: "rdp", name: "RDP Hijacking", mitre: "T1563.002", risk: "high" },
+    { id: "dcom", name: "DCOM Execution", mitre: "T1021.003", risk: "medium" },
+  ];
+
+  const credentials = [
+    { user: "Administrator", type: "NTLM", source: "DC01", cracked: true },
+    { user: "sqlsvc", type: "Kerberos", source: "DB01", cracked: false },
+    { user: "www-data", type: "SSH Key", source: "WEB01", cracked: true },
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "topology":
+        return (
+          <div className="space-y-3">
+            <div className="text-xs font-semibold text-[hsl(0,100%,75%)]">NETWORK TOPOLOGY</div>
+            <div className="space-y-2">
+              {hosts.map((host) => (
+                <div key={host.id} className={`p-3 rounded-lg border ${
+                  host.compromised
+                    ? "bg-[hsl(0,100%,10%)] border-[hsl(0,100%,30%)]"
+                    : "bg-[hsl(0,100%,7%)] border-[hsl(0,100%,15%)]"
+                }`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Network className="w-4 h-4 text-[hsl(0,60%,50%)]" />
+                      <span className="text-sm font-medium text-[hsl(0,100%,85%)]">{host.hostname}</span>
+                      {host.compromised && (
+                        <Badge className="text-[9px] bg-[hsl(0,100%,35%)]">OWNED</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-[hsl(0,60%,50%)] grid grid-cols-2 gap-1">
+                    <span>IP: {host.ip}</span>
+                    <span>OS: {host.os}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case "movement":
+        return (
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-[hsl(0,100%,75%)]">EXECUTE MOVEMENT</div>
+            <div className="space-y-3">
+              <Select value={sourceHost} onValueChange={setSourceHost}>
+                <SelectTrigger className="h-8 text-xs bg-[hsl(0,100%,6%)] border-[hsl(0,100%,20%)]">
+                  <SelectValue placeholder="Source (Compromised)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hosts.filter(h => h.compromised).map(h => (
+                    <SelectItem key={h.id} value={h.id}>{h.hostname} ({h.ip})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={targetHost} onValueChange={setTargetHost}>
+                <SelectTrigger className="h-8 text-xs bg-[hsl(0,100%,6%)] border-[hsl(0,100%,20%)]">
+                  <SelectValue placeholder="Target Host" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hosts.filter(h => !h.compromised).map(h => (
+                    <SelectItem key={h.id} value={h.id}>{h.hostname} ({h.ip})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={technique} onValueChange={setTechnique}>
+                <SelectTrigger className="h-8 text-xs bg-[hsl(0,100%,6%)] border-[hsl(0,100%,20%)]">
+                  <SelectValue placeholder="Technique" />
+                </SelectTrigger>
+                <SelectContent>
+                  {techniques.map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.name} ({t.mitre})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button className="w-full h-8 text-xs bg-[hsl(0,100%,35%)]" disabled={!sourceHost || !targetHost || !technique}>
+                <ArrowRight className="w-3 h-3 mr-1" /> Execute Movement
+              </Button>
+            </div>
+          </div>
+        );
+      case "credentials":
+        return (
+          <div className="space-y-3">
+            <div className="text-xs font-semibold text-[hsl(0,100%,75%)]">HARVESTED CREDENTIALS</div>
+            <div className="space-y-2">
+              {credentials.map((cred, i) => (
+                <div key={i} className="p-3 bg-[hsl(0,100%,7%)] border border-[hsl(0,100%,15%)] rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-[hsl(0,100%,85%)]">{cred.user}</span>
+                    <Badge className={`text-[9px] ${cred.cracked ? "bg-[hsl(120,100%,25%)]" : "bg-[hsl(45,100%,30%)]"}`}>
+                      {cred.cracked ? "Cracked" : "Hash"}
+                    </Badge>
+                  </div>
+                  <div className="text-[10px] text-[hsl(0,60%,50%)]">{cred.type} • from {cred.source}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case "techniques":
+        return (
+          <div className="space-y-3">
+            <div className="text-xs font-semibold text-[hsl(0,100%,75%)]">MOVEMENT TECHNIQUES</div>
+            <div className="space-y-2">
+              {techniques.map((t) => (
+                <div key={t.id} className="p-3 bg-[hsl(0,100%,7%)] border border-[hsl(0,100%,15%)] rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-[hsl(0,100%,85%)]">{t.name}</span>
+                    <Badge className="text-[9px] bg-[hsl(270,100%,30%)]">{t.mitre}</Badge>
+                  </div>
+                  <div className="text-[10px] text-[hsl(0,60%,50%)]">Risk: {t.risk}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
     }
-
-    const source = hosts.find(h => h.id === sourceHost);
-    const target = hosts.find(h => h.id === targetHost);
-
-    toast.success(`Initiating lateral movement from ${source?.hostname} to ${target?.hostname} via ${technique}`);
   };
 
   return (
-    <div className="p-3 space-y-3">
-      <div className="text-xs text-text-muted mb-2">NETWORK TOPOLOGY</div>
-
-      {/* Network Map */}
-      <div className="bg-surface-elevated border border-border rounded-lg p-3 space-y-2">
-        {hosts.map((host) => (
-          <div
-            key={host.id}
-            className={`p-2 rounded border ${
-              host.compromised
-                ? "bg-status-error/10 border-status-error/30"
-                : "bg-surface border-border"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Network className="w-3 h-3 text-text-muted" />
-                  <span className="font-mono text-xs font-semibold text-text-primary">
-                    {host.hostname}
-                  </span>
-                  {host.compromised && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 text-status-error">
-                      COMPROMISED
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-[10px] text-text-muted ml-5 mt-0.5">
-                  <div>IP: {host.ip}</div>
-                  <div>OS: {host.os}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-xs text-text-muted mb-2">LATERAL MOVEMENT CONFIGURATION</div>
-
-      {/* Movement Configuration */}
-      <div className="bg-surface-elevated border border-border rounded-lg p-3 space-y-3">
-        <div className="space-y-1.5">
-          <label className="text-[11px] text-text-secondary">Source Host (Compromised)</label>
-          <Select value={sourceHost} onValueChange={setSourceHost}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select source" />
-            </SelectTrigger>
-            <SelectContent>
-              {hosts.filter(h => h.compromised).map(host => (
-                <SelectItem key={host.id} value={host.id}>
-                  {host.hostname} ({host.ip})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[11px] text-text-secondary">Target Host</label>
-          <Select value={targetHost} onValueChange={setTargetHost}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select target" />
-            </SelectTrigger>
-            <SelectContent>
-              {hosts.filter(h => !h.compromised).map(host => (
-                <SelectItem key={host.id} value={host.id}>
-                  {host.hostname} ({host.ip})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[11px] text-text-secondary">Movement Technique</label>
-          <Select value={technique} onValueChange={setTechnique}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select technique" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pth">Pass-the-Hash (Mock)</SelectItem>
-              <SelectItem value="ptt">Pass-the-Ticket (Mock)</SelectItem>
-              <SelectItem value="psexec">PsExec (Mock)</SelectItem>
-              <SelectItem value="wmi">WMI Execution (Mock)</SelectItem>
-              <SelectItem value="rdp">RDP Hijacking (Mock)</SelectItem>
-              <SelectItem value="dcom">DCOM Execution (Mock)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[11px] text-text-secondary">Credentials (Optional)</label>
-          <Input
-            placeholder="NTLM hash or ticket (simulated)"
-            value={credentials}
-            onChange={(e) => setCredentials(e.target.value)}
-            className="h-8 text-xs font-mono"
-            type="password"
-          />
-        </div>
-
-        <Button
-          onClick={handleMove}
-          disabled={!sourceHost || !targetHost || !technique}
-          size="sm"
-          className="w-full h-8 text-xs gap-1.5"
-        >
-          <ArrowRight className="w-3 h-3" />
-          Simulate Lateral Movement
-        </Button>
-      </div>
-
-      {/* Technique Reference */}
-      <div className="bg-surface-elevated border border-border rounded-lg p-3 space-y-2">
-        <div className="text-xs font-semibold text-text-primary mb-2">TECHNIQUE REFERENCE</div>
-        
-        <div className="space-y-2">
-          <div className="flex items-start gap-2 p-2 bg-surface border border-border rounded">
-            <Key className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-text-primary">Pass-the-Hash (PtH)</div>
-              <div className="text-[10px] text-text-muted">Use NTLM hash without cracking (simulated)</div>
-              <Badge variant="outline" className="text-[9px] px-1 py-0 mt-1">Mock Mode</Badge>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 p-2 bg-surface border border-border rounded">
-            <Share2 className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-text-primary">Pass-the-Ticket (PtT)</div>
-              <div className="text-[10px] text-text-muted">Kerberos ticket reuse attack (simulated)</div>
-              <Badge variant="outline" className="text-[9px] px-1 py-0 mt-1">Mock Mode</Badge>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2 p-2 bg-surface border border-border rounded">
-            <Network className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-text-primary">Network Pivoting</div>
-              <div className="text-[10px] text-text-muted">Route through compromised hosts (simulated)</div>
-              <Badge variant="outline" className="text-[9px] px-1 py-0 mt-1">Mock Mode</Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Educational Notice */}
-      <div className="bg-accent/5 border border-accent/20 rounded p-2.5">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-          <div className="text-[11px] text-text-secondary space-y-1">
-            <div className="font-semibold text-text-primary">Red Team Training Simulation</div>
-            <div>This demonstrates lateral movement concepts for defensive security training. All network activity is completely mocked.</div>
-            <div className="pt-1 text-status-warning">⚠️ Real lateral movement attacks are illegal outside authorized penetration tests in isolated lab environments.</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Safety Features */}
-      <div className="text-xs text-text-muted space-y-2 pt-2">
-        <div className="font-semibold text-text-secondary">SAFETY GUARANTEES:</div>
-        <ul className="space-y-1 text-[11px] list-disc list-inside">
-          <li>All hosts are simulated data</li>
-          <li>No actual network connections</li>
-          <li>No credential attacks occur</li>
-          <li>Visual training interface only</li>
-        </ul>
-      </div>
+    <div className="flex flex-col h-full">
+      <InnerPanelTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} variant="red" />
+      <ScrollArea className="flex-1">
+        <div className="p-3">{renderContent()}</div>
+      </ScrollArea>
     </div>
   );
 };
