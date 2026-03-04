@@ -1,9 +1,8 @@
 import { X, Target, Zap, ShieldAlert, Radio, Crosshair, Users, Brain, Package, Syringe, Wifi, FolderOpen, Cpu, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal, UserX, Key, Upload, Antenna } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useState, lazy, Suspense, useEffect } from "react";
+import { useState, lazy, Suspense } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import PanelTabNav, { PanelTab } from "./PanelTabNav";
 
 // Lazy load panel components
 const NetworkGraph = lazy(() => import("./NetworkGraph"));
@@ -48,81 +47,9 @@ interface RightPanelProps {
   onClose: () => void;
 }
 
-// Panel tab categories for Red Team
-const panelTabs: PanelTab[] = [
-  { id: "recon", icon: Search, label: "Reconnaissance" },
-  { id: "exploit", icon: Bug, label: "Exploitation" },
-  { id: "payload", icon: Package, label: "Payloads" },
-  { id: "c2", icon: Radio, label: "Command & Control" },
-  { id: "lateral", icon: Crosshair, label: "Lateral Movement" },
-  { id: "persist", icon: Cpu, label: "Persistence" },
-  { id: "exfil", icon: Upload, label: "Exfiltration" },
-  { id: "intel", icon: Brain, label: "Intelligence" },
-  { id: "collab", icon: Users, label: "Collaboration" },
-];
-
-// Map active panels to their tab category
-const getPanelCategory = (panel: string): string => {
-  const categoryMap: Record<string, string> = {
-    // Reconnaissance
-    "targets": "recon",
-    "vuln-scanner": "recon",
-    "network": "recon",
-    "packet-capture": "recon",
-    "wireless-attack": "recon",
-    "sigint": "recon",
-    // Exploitation
-    "exploits": "exploit",
-    "exploit-db": "exploit",
-    "vulns": "exploit",
-    "zero-day": "exploit",
-    "rowhammer": "exploit",
-    "password-cracking": "exploit",
-    // Payloads
-    "payloads": "payload",
-    "implant-builder": "payload",
-    "injection": "payload",
-    // C2
-    "c2-framework": "c2",
-    "beacons": "c2",
-    "listeners": "c2",
-    "shells": "c2",
-    "covert": "c2",
-    // Lateral
-    "lateral": "lateral",
-    "postexploit": "lateral",
-    "physical-security": "lateral",
-    // Persistence
-    "apt-emulation": "persist",
-    "mitre-attack": "persist",
-    // Exfiltration
-    "exfiltrator": "exfil",
-    "loot": "exfil",
-    "monitor": "exfil",
-    // Intel
-    "ai-advisor": "intel",
-    "threat-intel": "intel",
-    "vuln-prioritizer": "intel",
-    "social-eng": "intel",
-    // Collaboration
-    "collab": "collab",
-    "pivots": "collab",
-    "report-scheduler": "collab",
-    "timeline": "collab",
-    "remediation": "collab",
-    "compliance": "collab",
-  };
-  return categoryMap[panel] || "recon";
-};
 
 const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
   const [selectedExploit, setSelectedExploit] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(() => getPanelCategory(activePanel));
-
-  // Update active tab when panel changes
-  useEffect(() => {
-    setActiveTab(getPanelCategory(activePanel));
-  }, [activePanel]);
 
   if (!activePanel) return null;
 
@@ -389,13 +316,6 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
         </button>
       </div>
       
-      {/* Tab Navigation */}
-      <PanelTabNav
-        tabs={panelTabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        variant="red"
-      />
       
       <ScrollArea className="flex-1">
         <Suspense fallback={<div className="p-4 text-xs text-text-secondary">Loading...</div>}>

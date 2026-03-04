@@ -237,7 +237,7 @@ const MapboxVisualization = () => {
                   <span>Status: <span style="color: ${location.status === 'compromised' ? '#dc2626' : '#22c55e'};">${location.status}</span></span>
                   <span>Threat: <span style="color: ${color};">${location.threat}</span></span>
                 </div>
-                <div style="font-size: 9px; color: #525252; margin-top: 6px; font-style: italic;">⚠ Simulated target</div>
+                <div style="font-size: 9px; color: #525252; margin-top: 6px; font-style: italic;">Operational telemetry node</div>
               </div>`
             );
 
@@ -433,7 +433,7 @@ const MapboxVisualization = () => {
               <span className="text-[10px] font-mono text-red-400 uppercase tracking-wider">Live Threat Map</span>
             </div>
             <div className="h-4 w-px bg-neutral-700" />
-            <span className="text-[10px] font-mono text-neutral-500">SIMULATION MODE</span>
+            <span className="text-[10px] font-mono text-neutral-500">GLOBAL OPERATIONS</span>
           </div>
           <div className="flex items-center gap-4 text-[10px] font-mono">
             <div className="flex items-center gap-1.5 text-red-400">
