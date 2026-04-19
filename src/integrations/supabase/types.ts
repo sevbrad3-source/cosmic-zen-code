@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_decisions: {
+        Row: {
+          affected_asset_ids: string[] | null
+          agent: string
+          auto_actions_executed: Json | null
+          confidence: number
+          correlated_ioc_ids: string[] | null
+          created_at: string
+          event_id: string | null
+          id: string
+          investigation_id: string | null
+          mitre_technique_id: string | null
+          mitre_technique_name: string | null
+          narrative: string | null
+          playbook: Json | null
+          severity: string
+        }
+        Insert: {
+          affected_asset_ids?: string[] | null
+          agent?: string
+          auto_actions_executed?: Json | null
+          confidence?: number
+          correlated_ioc_ids?: string[] | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          investigation_id?: string | null
+          mitre_technique_id?: string | null
+          mitre_technique_name?: string | null
+          narrative?: string | null
+          playbook?: Json | null
+          severity: string
+        }
+        Update: {
+          affected_asset_ids?: string[] | null
+          agent?: string
+          auto_actions_executed?: Json | null
+          confidence?: number
+          correlated_ioc_ids?: string[] | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          investigation_id?: string | null
+          mitre_technique_id?: string | null
+          mitre_technique_name?: string | null
+          narrative?: string | null
+          playbook?: Json | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_decisions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "security_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_decisions_investigation_id_fkey"
+            columns: ["investigation_id"]
+            isOneToOne: false
+            referencedRelation: "investigations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_hunts: {
+        Row: {
+          agent: string
+          confidence: number
+          created_at: string
+          hypothesis: string
+          id: string
+          notes: string | null
+          priority: string
+          rationale: string | null
+          related_event_ids: string[] | null
+          related_technique_ids: string[] | null
+          status: string
+          suggested_query: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent?: string
+          confidence?: number
+          created_at?: string
+          hypothesis: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          rationale?: string | null
+          related_event_ids?: string[] | null
+          related_technique_ids?: string[] | null
+          status?: string
+          suggested_query?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent?: string
+          confidence?: number
+          created_at?: string
+          hypothesis?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          rationale?: string | null
+          related_event_ids?: string[] | null
+          related_technique_ids?: string[] | null
+          status?: string
+          suggested_query?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attack_campaigns: {
         Row: {
           created_at: string
