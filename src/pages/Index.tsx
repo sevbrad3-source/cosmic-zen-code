@@ -83,7 +83,14 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           {mainContent === "command" ? (
-            <CinematicHome autonomous={autonomous} decisionsToday={decisionsToday} runs={runs} />
+            <CinematicHome
+              autonomous={autonomous}
+              decisionsToday={decisionsToday}
+              runs={runs}
+              hunts={hunts}
+              hunterBusy={hunterBusy}
+              onRunHunt={runHuntCycle}
+            />
           ) : (
             <EditorArea
               activeContent={mainContent}
