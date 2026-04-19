@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Command } from "cmdk";
-import { Search, ShieldAlert, Activity, Network, Map, Brain, FileSearch, Terminal, Globe } from "lucide-react";
+import { Search, ShieldAlert, Activity, Network, Map, Brain, FileSearch, Terminal, Globe, Crosshair } from "lucide-react";
 
 interface CommandPaletteProps {
   open: boolean;
