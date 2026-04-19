@@ -61,12 +61,15 @@ const Index = () => {
     else if (action === "blue") setActiveBluePanel(String(payload));
     else if (action === "red") setActiveRightPanel(String(payload));
     else if (action === "ai-triage-latest") triageLatest();
-    else if (action === "ai-toggle-auto") {
+    else if (action === "ai-run-hunt") {
+      toast.info("Threat Hunter cycle launched.");
+      runHuntCycle();
+    } else if (action === "ai-toggle-auto") {
       setAutonomous((v) => { toast.success(`Autonomous mode ${!v ? "ENABLED" : "DISABLED"}`); return !v; });
     } else if (action === "ai-brief") {
       toast.info("Situation brief queued for next idle cycle.");
     }
-  }, [triageLatest]);
+  }, [triageLatest, runHuntCycle]);
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
