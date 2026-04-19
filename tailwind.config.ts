@@ -21,7 +21,36 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           hover: "hsl(var(--primary-hover))",
+          glow: "hsl(var(--primary-glow))",
         },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        warning: "hsl(var(--warning))",
+        danger: "hsl(var(--danger))",
+        success: "hsl(var(--success))",
+        muted: {
+          DEFAULT: "hsl(var(--text-muted))",
+          foreground: "hsl(var(--text-muted))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--panel-bg))",
+          foreground: "hsl(var(--text-primary))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--panel-bg))",
+          foreground: "hsl(var(--text-primary))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--panel-bg))",
+          foreground: "hsl(var(--text-primary))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--foreground))",
+        },
+        ring: "hsl(var(--primary))",
         editor: {
           bg: "hsl(var(--editor-bg))",
           activeLine: "hsl(var(--editor-active-line))",

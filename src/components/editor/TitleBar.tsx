@@ -1,4 +1,4 @@
-import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu, Shield } from "lucide-react";
+import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu, Shield, Brain } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ interface TitleBarProps {
 
 const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChange }: TitleBarProps) => {
   const mainContentOptions = [
+    { id: "command", label: "Command Center", icon: Brain },
     { id: "joc", label: "Joint Ops Center", icon: Shield },
     { id: "editor", label: "Code Editor", icon: FileText },
     { id: "network", label: "Network Map", icon: Network },
