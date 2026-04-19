@@ -59,6 +59,7 @@ export const CommandPalette = ({ open, onOpenChange, onAction }: CommandPaletteP
 
           <Command.Group heading="Autonomous AI" className="text-[10px] uppercase tracking-wider text-text-muted px-2 pt-2">
             <PaletteItem icon={Brain} label="Trigger SOC Analyst on latest event" onSelect={() => run("ai-triage-latest")} />
+            <PaletteItem icon={Crosshair} label="Run Threat Hunter cycle now" onSelect={() => run("ai-run-hunt")} />
             <PaletteItem icon={Brain} label="Toggle Autonomous Mode" onSelect={() => run("ai-toggle-auto")} />
             <PaletteItem icon={FileSearch} label="Generate situation brief" onSelect={() => run("ai-brief")} />
           </Command.Group>
