@@ -13,6 +13,7 @@ import { ThreatTicker } from "@/components/cinematic/ThreatTicker";
 import { CommandPalette } from "@/components/cinematic/CommandPalette";
 import { AICopilotDock } from "@/components/cinematic/AICopilotDock";
 import { useAutonomousAnalyst } from "@/components/cinematic/useAutonomousAnalyst";
+import { useThreatHunter } from "@/components/cinematic/useThreatHunter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
