@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.get-mapbox-token]
 verify_jwt = false
+
+[functions.autonomous-soc-analyst]
+verify_jwt = false
+
+[functions.autonomous-threat-hunter]
+verify_jwt = false
+
+[functions.geo-ip-lookup]
+verify_jwt = false
