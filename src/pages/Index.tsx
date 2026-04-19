@@ -13,6 +13,7 @@ import { ThreatTicker } from "@/components/cinematic/ThreatTicker";
 import { CommandPalette } from "@/components/cinematic/CommandPalette";
 import { AICopilotDock } from "@/components/cinematic/AICopilotDock";
 import { useAutonomousAnalyst } from "@/components/cinematic/useAutonomousAnalyst";
+import { useThreatHunter } from "@/components/cinematic/useThreatHunter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -28,6 +29,7 @@ const Index = () => {
   const [dockCollapsed, setDockCollapsed] = useState(false);
 
   const { runs, busy, triage } = useAutonomousAnalyst({ autonomous, threshold: "medium" });
+  const { hunts, busy: hunterBusy, runCycle: runHuntCycle } = useThreatHunter({ autonomous, intervalSec: 180 });
 
   const decisionsToday = useMemo(() => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -59,12 +61,15 @@ const Index = () => {
     else if (action === "blue") setActiveBluePanel(String(payload));
     else if (action === "red") setActiveRightPanel(String(payload));
     else if (action === "ai-triage-latest") triageLatest();
-    else if (action === "ai-toggle-auto") {
+    else if (action === "ai-run-hunt") {
+      toast.info("Threat Hunter cycle launched.");
+      runHuntCycle();
+    } else if (action === "ai-toggle-auto") {
       setAutonomous((v) => { toast.success(`Autonomous mode ${!v ? "ENABLED" : "DISABLED"}`); return !v; });
     } else if (action === "ai-brief") {
       toast.info("Situation brief queued for next idle cycle.");
     }
-  }, [triageLatest]);
+  }, [triageLatest, runHuntCycle]);
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
@@ -81,7 +86,14 @@ const Index = () => {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           {mainContent === "command" ? (
-            <CinematicHome autonomous={autonomous} decisionsToday={decisionsToday} runs={runs} />
+            <CinematicHome
+              autonomous={autonomous}
+              decisionsToday={decisionsToday}
+              runs={runs}
+              hunts={hunts}
+              hunterBusy={hunterBusy}
+              onRunHunt={runHuntCycle}
+            />
           ) : (
             <EditorArea
               activeContent={mainContent}
