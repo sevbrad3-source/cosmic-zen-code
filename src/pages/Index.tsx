@@ -29,6 +29,7 @@ const Index = () => {
   const [dockCollapsed, setDockCollapsed] = useState(false);
 
   const { runs, busy, triage } = useAutonomousAnalyst({ autonomous, threshold: "medium" });
+  const { hunts, busy: hunterBusy, runCycle: runHuntCycle } = useThreatHunter({ autonomous, intervalSec: 180 });
 
   const decisionsToday = useMemo(() => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
