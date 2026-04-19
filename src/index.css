@@ -7,7 +7,87 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  :root, .theme-granite {
+  :root, .theme-cinematic {
+    /* Cinematic Command Center — deep space, holo cyan, plasma magenta, alert amber */
+    --background: 222 47% 5%;
+    --foreground: 200 30% 96%;
+
+    --editor-bg: 222 47% 6%;
+    --editor-active-line: 222 40% 11%;
+    --editor-selection: 188 100% 42%;
+
+    --sidebar-bg: 222 47% 4%;
+    --sidebar-hover: 222 40% 10%;
+    --sidebar-active: 188 100% 18%;
+
+    --titlebar-bg: 222 47% 3%;
+    --activitybar-bg: 222 47% 3%;
+    --activitybar-active: 188 100% 50%;
+
+    --panel-bg: 222 45% 6%;
+    --panel-border: 188 50% 18%;
+
+    --tab-bg: 222 45% 5%;
+    --tab-active-bg: 222 45% 8%;
+    --tab-hover: 222 40% 9%;
+    --tab-border: 188 50% 18%;
+
+    --primary: 188 100% 50%;
+    --primary-foreground: 222 47% 5%;
+    --primary-hover: 188 100% 60%;
+    --primary-glow: 188 100% 65%;
+
+    --accent: 320 100% 60%;
+    --accent-foreground: 222 47% 5%;
+
+    --warning: 38 100% 55%;
+    --danger: 0 90% 58%;
+    --success: 152 80% 50%;
+
+    --text-primary: 200 30% 96%;
+    --text-secondary: 200 25% 75%;
+    --text-muted: 215 20% 55%;
+
+    --border: 188 40% 15%;
+    --border-subtle: 222 40% 10%;
+
+    --statusbar-bg: 222 47% 3%;
+    --statusbar-text: 188 80% 80%;
+
+    --input-bg: 222 45% 8%;
+    --input-border: 188 40% 22%;
+    --input-focus: 188 100% 50%;
+
+    --scrollbar-thumb: 188 30% 22%;
+    --scrollbar-hover: 188 60% 35%;
+
+    --syntax-keyword: 320 100% 75%;
+    --syntax-string: 152 80% 65%;
+    --syntax-number: 38 100% 65%;
+    --syntax-comment: 215 20% 45%;
+    --syntax-function: 188 100% 70%;
+    --syntax-variable: 50 100% 75%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(188 100% 45%), hsl(220 100% 55%));
+    --gradient-plasma: linear-gradient(135deg, hsl(320 100% 55%), hsl(280 100% 60%), hsl(188 100% 55%));
+    --gradient-alert: linear-gradient(135deg, hsl(0 90% 55%), hsl(38 100% 55%));
+    --gradient-deep: radial-gradient(ellipse at top, hsl(222 60% 12%) 0%, hsl(222 47% 4%) 60%);
+
+    --shadow-glow: 0 0 24px hsl(188 100% 50% / 0.35), 0 0 60px hsl(188 100% 50% / 0.15);
+    --shadow-plasma: 0 0 24px hsl(320 100% 60% / 0.35);
+    --shadow-elevated: 0 12px 40px -8px hsl(222 60% 2% / 0.8);
+    --shadow-sm: 0 1px 2px 0 hsl(222 60% 2% / 0.5);
+    --shadow: 0 2px 6px -1px hsl(222 60% 2% / 0.6);
+    --shadow-md: 0 6px 14px -2px hsl(222 60% 2% / 0.7);
+
+    --radius: 0.375rem;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+  }
+
+  .theme-granite {
     /* Deep granite dark theme - VSCode inspired */
     --background: 0 0% 7%;
     --foreground: 0 0% 80%;
@@ -281,6 +361,28 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  .text-glow { text-shadow: 0 0 8px hsl(var(--primary) / 0.7), 0 0 18px hsl(var(--primary) / 0.35); }
+  .text-glow-accent { text-shadow: 0 0 8px hsl(var(--accent) / 0.7), 0 0 18px hsl(var(--accent) / 0.35); }
+  .bg-grid { background-image: linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px); background-size: 32px 32px; }
+  .bg-deep { background: var(--gradient-deep); }
+  .ring-glow { box-shadow: var(--shadow-glow); }
+  .ring-plasma { box-shadow: var(--shadow-plasma); }
+  .gradient-primary { background: var(--gradient-primary); }
+  .gradient-plasma { background: var(--gradient-plasma); }
+  .gradient-alert { background: var(--gradient-alert); }
+
+  @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+  .animate-scan { animation: scan 4s linear infinite; }
+
+  @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.4); opacity: 0; } }
+  .animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .animate-ticker { animation: ticker 40s linear infinite; }
+
+  @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.4); } 50% { box-shadow: 0 0 24px hsl(var(--primary) / 0.8), 0 0 48px hsl(var(--primary) / 0.4); } }
+  .animate-glow-pulse { animation: glow-pulse 2.5s ease-in-out infinite; }
+
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--scrollbar-thumb)) transparent;
