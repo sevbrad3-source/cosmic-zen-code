@@ -1,504 +1,351 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Shield, AlertTriangle, MapPin, Crosshair, Wifi, Server } from 'lucide-react';
+import { AlertTriangle, Crosshair, Wifi, Server, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { diagnostics, useProfiler } from '@/lib/diagnostics';
+
+type Phase = 'token' | 'initializing' | 'ready' | 'error';
+
+interface AttackLocation {
+  coords: [number, number];
+  name: string;
+  type: string;
+  status: string;
+  threat: 'critical' | 'high' | 'medium' | 'low';
+}
+
+const ATTACK_LOCATIONS: AttackLocation[] = [
+  { coords: [-122.4194, 37.7749], name: 'San Francisco', type: 'C2 Server', status: 'active', threat: 'critical' },
+  { coords: [139.6503, 35.6762], name: 'Tokyo', type: 'Attack Origin', status: 'active', threat: 'high' },
+  { coords: [2.3522, 48.8566], name: 'Paris', type: 'Proxy Node', status: 'active', threat: 'medium' },
+  { coords: [-0.1276, 51.5074], name: 'London', type: 'Target Network', status: 'compromised', threat: 'critical' },
+  { coords: [13.4050, 52.5200], name: 'Berlin', type: 'Lateral Movement', status: 'active', threat: 'high' },
+  { coords: [121.4737, 31.2304], name: 'Shanghai', type: 'Exfil Point', status: 'active', threat: 'critical' },
+  { coords: [-73.9857, 40.7484], name: 'New York', type: 'Target Network', status: 'scanning', threat: 'medium' },
+  { coords: [37.6173, 55.7558], name: 'Moscow', type: 'C2 Server', status: 'active', threat: 'critical' },
+  { coords: [-43.1729, -22.9068], name: 'Rio de Janeiro', type: 'Proxy Node', status: 'standby', threat: 'low' },
+  { coords: [77.2090, 28.6139], name: 'New Delhi', type: 'Attack Origin', status: 'active', threat: 'high' },
+];
+
+const CONNECTIONS: Array<[[number, number], [number, number]]> = [
+  [[-122.4194, 37.7749], [-0.1276, 51.5074]],
+  [[37.6173, 55.7558], [13.4050, 52.5200]],
+  [[139.6503, 35.6762], [121.4737, 31.2304]],
+  [[121.4737, 31.2304], [-73.9857, 40.7484]],
+];
+
+const threatColor = (t: string) =>
+  t === 'critical' ? '#ff3860' : t === 'high' ? '#ff8c42' : t === 'medium' ? '#ffd23f' : '#7dd87d';
 
 const MapboxVisualization = () => {
-  const profiler = useProfiler("MapboxVisualization");
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [mapError, setMapError] = useState<string | null>(null);
-  const [initAttempt, setInitAttempt] = useState(0);
-  const [stats, setStats] = useState({
-    activeTargets: 5,
-    c2Servers: 3,
-    proxyNodes: 8,
-    dataExfil: '2.4 GB'
-  });
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const tokenRef = useRef<string>('');
+  const [phase, setPhase] = useState<Phase>('token');
+  const [errMsg, setErrMsg] = useState<string>('');
+  const [attempt, setAttempt] = useState(0);
+  const stats = { activeTargets: ATTACK_LOCATIONS.length, c2Servers: 3, proxyNodes: 8, dataExfil: '2.4 GB' };
 
-  // Track render performance
-  useEffect(() => {
-    profiler.endRender();
-  });
-
-  useEffect(() => {
-    diagnostics.logMapbox('Component mounted');
-    const getMapboxToken = async () => {
-      diagnostics.logMapbox('Fetching token from edge function...');
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-
-        if (error) {
-          diagnostics.logMapbox('Token fetch error', error);
-          console.error('[Mapbox] Error fetching Mapbox token:', error);
-          setMapError("Failed to load map configuration");
-          toast.error("Failed to load map configuration");
-          setLoading(false);
-          return;
-        }
-
-        if (data?.token) {
-          diagnostics.logMapbox('Token received', { tokenLength: data.token.length, prefix: data.token.slice(0, 10) });
-          setMapError(null);
-          setLoading(true);
-          setMapboxToken(data.token);
-        } else {
-          diagnostics.logMapbox('Token missing in response', data);
-          setMapError("Map token missing");
-          setLoading(false);
-        }
-      } catch (err) {
-        diagnostics.logMapbox('Token fetch exception', err);
-        console.error('[Mapbox] Exception fetching Mapbox token:', err);
-        setMapError("Failed to initialize map");
-        toast.error("Failed to initialize map");
-        setLoading(false);
-      }
-    };
-
-    getMapboxToken();
+  const teardown = useCallback(() => {
+    if (mapRef.current) {
+      try { mapRef.current.remove(); } catch { /* ignore */ }
+      mapRef.current = null;
+    }
   }, []);
 
+  // Fetch token + initialize. Container is ALWAYS mounted, so ref is reliable.
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) {
-      diagnostics.logMapbox('Skipping init', { hasContainer: !!mapContainer.current, hasToken: !!mapboxToken });
-      return;
-    }
+    let cancelled = false;
+    let failSafe: number | undefined;
 
-    const container = mapContainer.current;
-    const rect = container.getBoundingClientRect();
-    diagnostics.logMapbox('Container dimensions', { width: rect.width, height: rect.height, visible: rect.width > 0 && rect.height > 0 });
+    const run = async () => {
+      setPhase('token');
+      setErrMsg('');
 
-    // ensure we don't keep a half-initialized instance around
-    if (map.current) {
+      // 1. Token
       try {
-        map.current.remove();
-        diagnostics.logMapbox('Removed previous map instance');
-      } catch {
-        // ignore
-      }
-      map.current = null;
-    }
-
-    setMapError(null);
-    setLoading(true);
-
-    // Small delay to ensure container is sized
-    const initTimeout = setTimeout(() => {
-      const finalRect = container.getBoundingClientRect();
-      diagnostics.logMapbox('Initializing map', { containerWidth: finalRect.width, containerHeight: finalRect.height });
-
-      if (finalRect.width === 0 || finalRect.height === 0) {
-        diagnostics.logMapbox('Container has zero dimensions - map will fail');
-        setMapError('Map container has zero dimensions');
-        setLoading(false);
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (cancelled) return;
+        if (error || !data?.token) {
+          setErrMsg(error?.message || 'Token unavailable');
+          setPhase('error');
+          return;
+        }
+        tokenRef.current = data.token;
+      } catch (e) {
+        if (cancelled) return;
+        setErrMsg(e instanceof Error ? e.message : 'Token fetch failed');
+        setPhase('error');
         return;
       }
 
-      try {
-        mapboxgl.accessToken = mapboxToken;
+      if (cancelled) return;
+      setPhase('initializing');
 
-        map.current = new mapboxgl.Map({
+      // Wait one frame so the container is laid out
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      if (cancelled) return;
+
+      const container = mapContainer.current;
+      if (!container) {
+        setErrMsg('Map container missing');
+        setPhase('error');
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        // Try again next frame — layout sometimes settles late
+        await new Promise((r) => setTimeout(r, 80));
+        if (cancelled) return;
+      }
+
+      teardown();
+      mapboxgl.accessToken = tokenRef.current;
+
+      let map: mapboxgl.Map;
+      try {
+        map = new mapboxgl.Map({
           container,
           style: 'mapbox://styles/mapbox/dark-v11',
           projection: 'globe',
-          zoom: 1.8,
-          center: [20, 30],
-          pitch: 45,
+          zoom: 1.6,
+          center: [20, 25],
+          pitch: 30,
+          attributionControl: false,
         });
+      } catch (e) {
+        setErrMsg(e instanceof Error ? e.message : 'Init failed');
+        setPhase('error');
+        return;
+      }
 
-        diagnostics.logMapbox('Map instance created, waiting for load event...');
+      mapRef.current = map;
 
-        // If we never reach 'load', don't leave the UI stuck forever
-        const failSafe = window.setTimeout(() => {
-          if (loading) {
-            diagnostics.logMapbox('Load timeout - map stuck initializing', { elapsed: '12s' });
-            console.error('[Mapbox] load timeout: map stuck initializing');
-            setMapError('Map failed to load (timeout).');
-            setLoading(false);
-            try {
-              map.current?.remove();
-            } catch {
-              // ignore
-            }
-            map.current = null;
-          }
-        }, 12000);
+      failSafe = window.setTimeout(() => {
+        if (!cancelled && phase !== 'ready') {
+          setErrMsg('Load timeout (15s). Check network connectivity to api.mapbox.com.');
+          setPhase('error');
+          teardown();
+        }
+      }, 15000);
 
-        map.current.on('error', (e) => {
-          diagnostics.logMapbox('Error event fired', { error: e?.error?.message || e });
-          console.error('[Mapbox] error event', e?.error || e);
+      map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+
+      map.on('error', (e) => {
+        const msg = e?.error?.message || 'Map render error';
+        // Style/tile errors after load are non-fatal — only error out before ready
+        if (mapRef.current && phase !== 'ready') {
           window.clearTimeout(failSafe);
-          setMapError('Map failed to load (error).');
-          setLoading(false);
-          try {
-            map.current?.remove();
-          } catch {
-            // ignore
-          }
-          map.current = null;
-        });
+          setErrMsg(msg);
+          setPhase('error');
+          teardown();
+        } else {
+          console.warn('[Mapbox] non-fatal:', msg);
+        }
+      });
 
-        map.current.addControl(
-          new mapboxgl.NavigationControl({
-            visualizePitch: true,
-          }),
-          'bottom-right'
-        );
-
-        map.current.on('style.load', () => {
-          diagnostics.logMapbox('Style loaded');
-          map.current?.setFog({
-            color: 'rgb(5, 5, 8)',
-            'high-color': 'rgb(20, 5, 10)',
-            'horizon-blend': 0.15,
-            'star-intensity': 0.2,
-            'space-color': 'rgb(5, 5, 8)',
+      map.on('style.load', () => {
+        try {
+          map.setFog({
+            color: 'rgb(8, 10, 18)',
+            'high-color': 'rgb(30, 10, 25)',
+            'horizon-blend': 0.18,
+            'star-intensity': 0.4,
+            'space-color': 'rgb(2, 3, 6)',
           });
-        });
+        } catch { /* ignore */ }
+      });
 
-        const attackLocations = [
-          { coords: [-122.4194, 37.7749], name: "San Francisco", type: "C2 Server", status: "active", threat: "critical" },
-          { coords: [139.6503, 35.6762], name: "Tokyo", type: "Attack Origin", status: "active", threat: "high" },
-          { coords: [2.3522, 48.8566], name: "Paris", type: "Proxy Node", status: "active", threat: "medium" },
-          { coords: [-0.1276, 51.5074], name: "London", type: "Target Network", status: "compromised", threat: "critical" },
-          { coords: [13.4050, 52.5200], name: "Berlin", type: "Lateral Movement", status: "active", threat: "high" },
-          { coords: [121.4737, 31.2304], name: "Shanghai", type: "Exfil Point", status: "active", threat: "critical" },
-          { coords: [-73.9857, 40.7484], name: "New York", type: "Target Network", status: "scanning", threat: "medium" },
-          { coords: [37.6173, 55.7558], name: "Moscow", type: "C2 Server", status: "active", threat: "critical" },
-          { coords: [-43.1729, -22.9068], name: "Rio de Janeiro", type: "Proxy Node", status: "standby", threat: "low" },
-          { coords: [77.2090, 28.6139], name: "New Delhi", type: "Attack Origin", status: "active", threat: "high" },
-        ];
+      map.on('load', () => {
+        if (cancelled) return;
+        window.clearTimeout(failSafe);
 
-        const getMarkerColor = (threat: string) => {
-          switch (threat) {
-            case 'critical': return '#dc2626';
-            case 'high': return '#ea580c';
-            case 'medium': return '#ca8a04';
-            default: return '#65a30d';
+        // Markers
+        for (const loc of ATTACK_LOCATIONS) {
+          const color = threatColor(loc.threat);
+          const size = loc.type === 'C2 Server' ? 16 : loc.type === 'Target Network' ? 14 : 11;
+
+          const wrapper = document.createElement('div');
+          wrapper.style.position = 'relative';
+          wrapper.style.width = `${size}px`;
+          wrapper.style.height = `${size}px`;
+          wrapper.style.cursor = 'pointer';
+
+          const ring = document.createElement('div');
+          ring.style.position = 'absolute';
+          ring.style.inset = '0';
+          ring.style.borderRadius = '50%';
+          ring.style.border = `2px solid ${color}`;
+          ring.style.boxShadow = `0 0 12px ${color}, 0 0 24px ${color}80`;
+          ring.style.background = `radial-gradient(circle, ${color}cc, ${color}33)`;
+          if (loc.threat === 'critical' || loc.threat === 'high') {
+            ring.style.animation = 'mb-pulse 2s ease-in-out infinite';
           }
-        };
+          wrapper.appendChild(ring);
 
-        const getMarkerSize = (type: string) => {
-          switch (type) {
-            case 'C2 Server': return 16;
-            case 'Target Network': return 14;
-            default: return 10;
-          }
-        };
+          const popup = new mapboxgl.Popup({ offset: 18, className: 'mb-popup', closeButton: false }).setHTML(`
+            <div style="padding:10px 12px;background:linear-gradient(135deg,#0a0c14,#1a0a18);color:#e5e7eb;border-radius:6px;border:1px solid ${color}66;min-width:180px;font-family:ui-monospace,monospace;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <div style="width:6px;height:6px;border-radius:50%;background:${color};box-shadow:0 0 8px ${color};"></div>
+                <div style="font-size:12px;font-weight:600;">${loc.name}</div>
+              </div>
+              <div style="font-size:10px;color:${color};text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">${loc.type}</div>
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:#9ca3af;padding-top:6px;border-top:1px solid #2a2a3a;">
+                <span>${loc.status.toUpperCase()}</span><span style="color:${color};">${loc.threat.toUpperCase()}</span>
+              </div>
+            </div>`);
 
-        map.current.on('load', () => {
-          window.clearTimeout(failSafe);
-          diagnostics.logMapbox('Map load event fired - SUCCESS');
+          new mapboxgl.Marker(wrapper).setLngLat(loc.coords).setPopup(popup).addTo(map);
+        }
 
-          // Force a resize after mount/layout to avoid permanent blank canvas
-          try {
-            map.current?.resize();
-            window.setTimeout(() => map.current?.resize(), 250);
-            diagnostics.logMapbox('Map resized');
-          } catch {
-            // ignore
-          }
-
-          setLoading(false);
-
-          attackLocations.forEach((location) => {
-            const color = getMarkerColor(location.threat);
-            const size = getMarkerSize(location.type);
-
-            const el = document.createElement('div');
-            el.className = 'attack-marker';
-            el.style.width = `${size}px`;
-            el.style.height = `${size}px`;
-            el.style.borderRadius = '50%';
-            el.style.backgroundColor = color;
-            el.style.border = `2px solid ${color}`;
-            el.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}40`;
-            el.style.cursor = 'pointer';
-            el.style.animation = location.threat === 'critical' ? 'pulse 2s infinite' : 'none';
-
-            const popup = new mapboxgl.Popup({
-              offset: 25,
-              className: 'threat-popup'
-            }).setHTML(
-              `<div style="padding: 12px; background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%); color: #e5e5e5; border-radius: 8px; border: 1px solid ${color}40; min-width: 180px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                  <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; box-shadow: 0 0 8px ${color};"></div>
-                  <div style="font-size: 13px; font-weight: 600; color: #fff;">${location.name}</div>
-                </div>
-                <div style="font-size: 11px; color: ${color}; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${location.type}</div>
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #a3a3a3; padding-top: 8px; border-top: 1px solid #333;">
-                  <span>Status: <span style="color: ${location.status === 'compromised' ? '#dc2626' : '#22c55e'};">${location.status}</span></span>
-                  <span>Threat: <span style="color: ${color};">${location.threat}</span></span>
-                </div>
-                <div style="font-size: 9px; color: #525252; margin-top: 6px; font-style: italic;">Operational telemetry node</div>
-              </div>`
-            );
-
-            new mapboxgl.Marker(el)
-              .setLngLat(location.coords as [number, number])
-              .setPopup(popup)
-              .addTo(map.current!);
-          });
-
-          const connections = [
-            { from: [-122.4194, 37.7749], to: [-0.1276, 51.5074] },
-            { from: [37.6173, 55.7558], to: [13.4050, 52.5200] },
-            { from: [139.6503, 35.6762], to: [121.4737, 31.2304] },
-          ];
-
-          map.current?.addSource('connections', {
+        // Connection arcs
+        try {
+          map.addSource('connections', {
             type: 'geojson',
             data: {
               type: 'FeatureCollection',
-              features: connections.map(conn => ({
+              features: CONNECTIONS.map(([from, to]) => ({
                 type: 'Feature',
                 properties: {},
-                geometry: {
-                  type: 'LineString',
-                  coordinates: [conn.from, conn.to]
-                }
-              }))
-            }
+                geometry: { type: 'LineString', coordinates: [from, to] },
+              })),
+            },
           });
-
-          map.current?.addLayer({
+          map.addLayer({
             id: 'connection-lines',
             type: 'line',
             source: 'connections',
             paint: {
-              'line-color': '#dc2626',
-              'line-width': 1.5,
-              'line-opacity': 0.4,
-              'line-dasharray': [2, 2]
-            }
+              'line-color': '#ff3860',
+              'line-width': 1.4,
+              'line-opacity': 0.55,
+              'line-dasharray': [2, 3],
+            },
           });
+        } catch { /* ignore */ }
 
-          // Slow rotation
-          const secondsPerRevolution = 360;
-          let userInteracting = false;
+        // Force resize after layout settle
+        requestAnimationFrame(() => map.resize());
+        window.setTimeout(() => map.resize(), 300);
 
-          function spinGlobe() {
-            if (!map.current || userInteracting) return;
-            const zoom = map.current.getZoom();
-            if (zoom < 4) {
-              const distancePerSecond = 360 / secondsPerRevolution;
-              const center = map.current.getCenter();
-              center.lng -= distancePerSecond / 60;
-              map.current.easeTo({ center, duration: 1000, easing: (n) => n });
-            }
+        // Slow auto-rotation
+        let userInteracting = false;
+        const spin = () => {
+          if (!mapRef.current || userInteracting) return;
+          if (map.getZoom() < 4) {
+            const c = map.getCenter();
+            c.lng -= 0.12;
+            map.easeTo({ center: c, duration: 1000, easing: (n) => n });
           }
+        };
+        map.on('mousedown', () => { userInteracting = true; });
+        map.on('mouseup', () => { userInteracting = false; });
+        map.on('dragstart', () => { userInteracting = true; });
+        map.on('moveend', spin);
+        const spinInt = window.setInterval(spin, 1500);
+        map.once('remove', () => window.clearInterval(spinInt));
 
-          map.current.on('mousedown', () => { userInteracting = true; });
-          map.current.on('mouseup', () => { userInteracting = false; });
-          map.current.on('moveend', spinGlobe);
+        setPhase('ready');
+      });
+    };
 
-          const spinInterval = window.setInterval(spinGlobe, 1000);
-
-          // cleanup rotation timer if the map gets removed
-          map.current.once('remove', () => {
-            window.clearInterval(spinInterval);
-          });
-        });
-      } catch (err) {
-        console.error('Error initializing map:', err);
-        setMapError('Map failed to initialize.');
-        setLoading(false);
-        try {
-          map.current?.remove();
-        } catch {
-          // ignore
-        }
-        map.current = null;
-      }
-    }, 150);
+    run();
 
     return () => {
-      clearTimeout(initTimeout);
-      try {
-        map.current?.remove();
-      } catch {
-        // ignore
-      }
-      map.current = null;
+      cancelled = true;
+      if (failSafe) window.clearTimeout(failSafe);
+      teardown();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapboxToken, initAttempt]);
+  }, [attempt]);
 
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-black">
-        <div className="text-center space-y-3">
-          <div className="relative w-12 h-12 mx-auto">
-            <div className="absolute inset-0 border-2 border-red-500/30 rounded-full animate-ping" />
-            <div className="absolute inset-2 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-          </div>
-          <div className="text-xs text-red-500/70 font-mono">INITIALIZING GLOBAL THREAT MAP...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (mapError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-black p-4">
-        <div className="text-center space-y-3 max-w-md">
-          <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/30">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
-          </div>
-          <div className="text-sm text-red-400 font-semibold">MAP INITIALIZATION FAILED</div>
-          <div className="text-xs text-neutral-500">{mapError}</div>
-          <div className="pt-2 flex items-center justify-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                setInitAttempt((v) => v + 1);
-              }}
-            >
-              Retry
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setLoading(true);
-                setMapError(null);
-                setMapboxToken("");
-                supabase.functions.invoke('get-mapbox-token').then(({ data, error }) => {
-                  if (error || !data?.token) {
-                    setMapError('Failed to refresh token.');
-                    setLoading(false);
-                    return;
-                  }
-                  setMapboxToken(data.token);
-                }).catch(() => {
-                  setMapError('Failed to refresh token.');
-                  setLoading(false);
-                });
-              }}
-            >
-              Refresh Token
-            </Button>
-          </div>
-          <div className="text-[10px] text-neutral-600">Open the browser console and look for a “Mapbox error event” for the exact cause.</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!mapboxToken) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-black p-4">
-        <div className="text-center space-y-3 max-w-md">
-          <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/30">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
-          </div>
-          <div className="text-sm text-red-400 font-semibold">SATELLITE LINK OFFLINE</div>
-          <div className="text-xs text-neutral-500">Unable to establish connection to global threat visualization network</div>
-        </div>
-      </div>
-    );
-  }
+  // Resize on container resize (panels resize often)
+  useEffect(() => {
+    const el = mapContainer.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      mapRef.current?.resize();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
-    <div className="relative w-full h-full min-h-[400px] bg-black overflow-hidden" style={{ minHeight: '400px' }}>
+    <div className="relative w-full h-full min-h-[400px] bg-background overflow-hidden">
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.3); }
+        @keyframes mb-pulse {
+          0%,100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.45); opacity: 0.55; }
         }
-        .mapboxgl-popup-content {
-          background: transparent !important;
-          padding: 0 !important;
-          box-shadow: none !important;
-        }
-        .mapboxgl-popup-tip {
-          display: none !important;
-        }
+        .mb-popup .mapboxgl-popup-content { background: transparent !important; padding: 0 !important; box-shadow: none !important; border-radius: 6px !important; }
+        .mb-popup .mapboxgl-popup-tip { display: none !important; }
+        .mapboxgl-ctrl-bottom-right { bottom: 56px !important; }
+        .mapboxgl-ctrl-group { background: hsl(var(--card) / 0.85) !important; border: 1px solid hsl(var(--border)) !important; }
+        .mapboxgl-ctrl-group button { background-color: transparent !important; }
+        .mapboxgl-ctrl-group button span { filter: invert(0.85); }
       `}</style>
 
-      {/* Top Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black via-black/80 to-transparent p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/30 rounded">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-mono text-red-400 uppercase tracking-wider">Live Threat Map</span>
+      {/* Map container — ALWAYS mounted so the ref is stable */}
+      <div ref={mapContainer} className="absolute inset-0" />
+
+      {/* Loading / error overlays */}
+      {(phase === 'token' || phase === 'initializing') && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/85 backdrop-blur-sm">
+          <div className="text-center space-y-3">
+            <div className="relative w-14 h-14 mx-auto">
+              <div className="absolute inset-0 border-2 border-primary/30 rounded-full animate-ping" />
+              <div className="absolute inset-2 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-            <div className="h-4 w-px bg-neutral-700" />
-            <span className="text-[10px] font-mono text-neutral-500">GLOBAL OPERATIONS</span>
-          </div>
-          <div className="flex items-center gap-4 text-[10px] font-mono">
-            <div className="flex items-center gap-1.5 text-red-400">
-              <Crosshair className="w-3 h-3" />
-              <span>{stats.activeTargets} Targets</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-orange-400">
-              <Server className="w-3 h-3" />
-              <span>{stats.c2Servers} C2</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-yellow-400">
-              <Wifi className="w-3 h-3" />
-              <span>{stats.proxyNodes} Proxies</span>
+            <div className="text-[10px] tracking-[0.3em] font-mono text-primary/80 uppercase">
+              {phase === 'token' ? 'Acquiring satellite link' : 'Rendering globe'}
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Safety Banner */}
-      <div className="absolute top-14 left-3 z-10 bg-black/80 border border-red-500/20 rounded px-3 py-2 flex items-start gap-2 max-w-xs backdrop-blur-sm">
-        <Shield className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-        <div className="text-[10px]">
-          <div className="font-semibold text-red-400 mb-0.5">SIMULATION ENVIRONMENT</div>
-          <div className="text-neutral-500">All markers represent simulated threat actors for training purposes only.</div>
-        </div>
-      </div>
-
-      {/* Map Container */}
-      <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%', minHeight: '400px' }} />
-
-      {/* Legend */}
-      <div className="absolute bottom-3 right-3 bg-black/90 border border-red-500/20 rounded-lg p-3 text-xs space-y-2 z-10 backdrop-blur-sm min-w-[160px]">
-        <div className="font-semibold text-neutral-300 mb-2 flex items-center gap-2 pb-2 border-b border-neutral-800">
-          <MapPin className="w-3.5 h-3.5 text-red-500" />
-          <span>Threat Classification</span>
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_#dc2626]" />
-            <span className="text-neutral-400">Critical Threat</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500 shadow-[0_0_6px_#ea580c]" />
-            <span className="text-neutral-400">High Threat</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-[0_0_6px_#ca8a04]" />
-            <span className="text-neutral-400">Medium Threat</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_6px_#65a30d]" />
-            <span className="text-neutral-400">Low Threat</span>
+      {phase === 'error' && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/90 backdrop-blur-sm p-4">
+          <div className="text-center space-y-3 max-w-md">
+            <div className="w-12 h-12 mx-auto rounded-full bg-destructive/10 flex items-center justify-center border border-destructive/40">
+              <AlertTriangle className="w-6 h-6 text-destructive" />
+            </div>
+            <div className="text-sm font-semibold text-destructive uppercase tracking-wider">Map Offline</div>
+            <div className="text-xs text-muted-foreground break-words">{errMsg || 'Unknown error'}</div>
+            <Button size="sm" variant="secondary" onClick={() => setAttempt((v) => v + 1)} className="gap-2">
+              <RefreshCw className="w-3 h-3" /> Retry
+            </Button>
           </div>
         </div>
-        <div className="text-[9px] text-neutral-600 pt-2 border-t border-neutral-800 italic">
-          Mock data for visualization
-        </div>
-      </div>
+      )}
 
-      {/* Stats Panel */}
-      <div className="absolute bottom-3 left-3 bg-black/90 border border-red-500/20 rounded-lg p-3 z-10 backdrop-blur-sm">
-        <div className="text-[10px] font-mono text-neutral-500 mb-2">DATA EXFILTRATION</div>
-        <div className="text-xl font-bold text-red-500">{stats.dataExfil}</div>
-        <div className="text-[9px] text-neutral-600 mt-1">simulated transfer volume</div>
-      </div>
+      {/* HUD overlay */}
+      {phase === 'ready' && (
+        <>
+          <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-background via-background/70 to-transparent p-3 pointer-events-none">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-destructive/10 border border-destructive/40 rounded">
+                  <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                  <span className="text-[10px] font-mono text-destructive uppercase tracking-[0.2em]">Live Threat Map</span>
+                </div>
+                <span className="text-[10px] font-mono text-muted-foreground">GLOBAL OPERATIONS</span>
+              </div>
+              <div className="flex items-center gap-4 text-[10px] font-mono">
+                <div className="flex items-center gap-1.5 text-destructive"><Crosshair className="w-3 h-3" />{stats.activeTargets} TGT</div>
+                <div className="flex items-center gap-1.5 text-orange-400"><Server className="w-3 h-3" />{stats.c2Servers} C2</div>
+                <div className="flex items-center gap-1.5 text-yellow-400"><Wifi className="w-3 h-3" />{stats.proxyNodes} PRX</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-3 left-3 z-20 bg-card/85 border border-border rounded px-3 py-2 backdrop-blur-sm">
+            <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-[0.2em] mb-1">Exfiltration</div>
+            <div className="text-sm font-mono font-bold text-destructive">{stats.dataExfil}</div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
