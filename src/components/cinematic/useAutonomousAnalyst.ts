@@ -39,15 +39,28 @@ export function useAutonomousAnalyst({ autonomous, threshold = "medium" }: Optio
   const [error, setError] = useState<string | null>(null);
   const seen = useRef<Set<string>>(new Set());
 
+  const busyRef = useRef(false);
+
   const triage = useCallback(async (event_id: string, eventMeta?: { event_type?: string; severity?: string }) => {
     if (seen.current.has(event_id)) return;
+    if (busyRef.current) return; // serialize — avoid burst calls
     seen.current.add(event_id);
+    busyRef.current = true;
     setBusy(true); setError(null);
     try {
       const { data, error } = await supabase.functions.invoke("autonomous-soc-analyst", {
         body: { event_id, auto_open_investigation: autonomous },
       });
-      if (error) throw error;
+      if (error) {
+        const msg = error.message || String(error);
+        if (/429|rate/i.test(msg)) {
+          setError("Rate limited — analyst paused briefly");
+          seen.current.delete(event_id); // allow retry later
+          await new Promise((r) => setTimeout(r, 30_000));
+          return;
+        }
+        throw error;
+      }
       if (data?.error) throw new Error(data.error);
       setRuns((prev) => [{
         id: crypto.randomUUID(),
@@ -61,9 +74,14 @@ export function useAutonomousAnalyst({ autonomous, threshold = "medium" }: Optio
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }, [autonomous]);
+
+  // Stable ref so the realtime subscription doesn't tear down on every triage
+  const triageRef = useRef(triage);
+  useEffect(() => { triageRef.current = triage; }, [triage]);
 
   // Subscribe to new events; auto-triage when above threshold and autonomous=on.
   useEffect(() => {
@@ -73,12 +91,12 @@ export function useAutonomousAnalyst({ autonomous, threshold = "medium" }: Optio
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "security_events" }, (payload) => {
         const ev = payload.new as { id: string; severity: string; event_type: string };
         if (sevRank(ev.severity) >= sevRank(threshold)) {
-          triage(ev.id, { event_type: ev.event_type, severity: ev.severity });
+          triageRef.current(ev.id, { event_type: ev.event_type, severity: ev.severity });
         }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [autonomous, threshold, triage]);
+  }, [autonomous, threshold]);
 
   return { runs, busy, error, triage };
 }

@@ -50,29 +50,50 @@ export function useThreatHunter({ autonomous, intervalSec = 180 }: Options) {
     return () => { mounted = false; supabase.removeChannel(ch); };
   }, []);
 
+  const busyRef = useRef(false);
+  const cooldownMs = Math.max(intervalSec * 1000, 60_000);
+
   const runCycle = useCallback(async () => {
-    if (busy) return;
+    if (busyRef.current) return;
+    // hard cooldown — protects against rapid re-invocation / 429s
+    if (Date.now() - lastRun.current < cooldownMs - 500) return;
+    busyRef.current = true;
     setBusy(true); setError(null);
     try {
       const { data, error } = await supabase.functions.invoke("autonomous-threat-hunter", { body: {} });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      lastRun.current = Date.now();
+      if (error) {
+        // Treat 429 / 402 gracefully — back off, don't spam
+        const msg = error.message || String(error);
+        if (/429|rate/i.test(msg)) {
+          lastRun.current = Date.now() + cooldownMs; // extra back-off
+          setError("Rate limited — backing off");
+        } else {
+          throw error;
+        }
+      } else if (data?.error) {
+        throw new Error(data.error);
+      } else {
+        lastRun.current = Date.now();
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
-  }, [busy]);
+  }, [cooldownMs]);
 
-  // Periodic cycles
+  // Stable ref so periodic effect doesn't restart on every busy flip
+  const runRef = useRef(runCycle);
+  useEffect(() => { runRef.current = runCycle; }, [runCycle]);
+
+  // Periodic cycles — depends ONLY on autonomous/interval, never on busy
   useEffect(() => {
     if (!autonomous || intervalSec <= 0) return;
-    // initial offset so we don't spam right at boot
-    const kick = window.setTimeout(runCycle, 8000);
-    const id = window.setInterval(runCycle, intervalSec * 1000);
+    const kick = window.setTimeout(() => runRef.current(), 15_000);
+    const id = window.setInterval(() => runRef.current(), intervalSec * 1000);
     return () => { window.clearTimeout(kick); window.clearInterval(id); };
-  }, [autonomous, intervalSec, runCycle]);
+  }, [autonomous, intervalSec]);
 
   const updateStatus = useCallback(async (id: string, status: string) => {
     await supabase.from("ai_hunts").update({ status }).eq("id", id);
