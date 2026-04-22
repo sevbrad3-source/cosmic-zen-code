@@ -2,6 +2,9 @@
 // proposes a response playbook, persists the decision, optionally opens an
 // investigation, and (when allowed) auto-executes safe playbook actions.
 // Powered by Lovable AI Gateway.
+//
+// SECURITY: Caller JWT is validated before any privileged work. All DB writes
+// use the service-role client only AFTER the caller is confirmed authenticated.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -80,15 +83,18 @@ type Step = {
   rationale: string; auto_executable: boolean;
 };
 
+// UUID v4 sanity check (defence-in-depth on AI-supplied target IDs).
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function executeStep(supabase: any, step: Step, investigationId: string | null) {
   const code = (step.action_code ?? "").trim();
   try {
-    if (code === "mark_asset_compromised" && step.target) {
+    if (code === "mark_asset_compromised" && UUID_RE.test(step.target)) {
       await supabase.from("network_assets")
         .update({ is_compromised: true, risk_score: 95 }).eq("id", step.target);
       return { step: step.step, code, target: step.target, ok: true };
     }
-    if (code === "deactivate_ioc" && step.target) {
+    if (code === "deactivate_ioc" && UUID_RE.test(step.target)) {
       await supabase.from("iocs").update({ is_active: false }).eq("id", step.target);
       return { step: step.step, code, target: step.target, ok: true };
     }
@@ -107,16 +113,39 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // === AuthN: validate the caller JWT BEFORE any privileged work. ===
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: userData, error: userErr } = await anonClient.auth.getUser(jwt);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Service-role client constructed only AFTER caller identity is confirmed.
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const { event_id, auto_open_investigation = true, auto_execute = true } = await req.json();
-    if (!event_id) {
-      return new Response(JSON.stringify({ error: "event_id required" }), {
+    const body = await req.json().catch(() => ({}));
+    const event_id = typeof body?.event_id === "string" ? body.event_id : "";
+    const auto_open_investigation = body?.auto_open_investigation !== false;
+    const auto_execute = body?.auto_execute !== false;
+
+    if (!UUID_RE.test(event_id)) {
+      return new Response(JSON.stringify({ error: "valid event_id (uuid) required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -179,7 +208,7 @@ Deno.serve(async (req) => {
         status: "open",
         priority: decision.severity === "critical" ? "critical"
           : decision.severity === "high" ? "high" : "medium",
-        assigned_to: "autonomous-soc-analyst",
+        assigned_to: userData.user.email ?? "autonomous-soc-analyst",
         mitre_tactics: decision.mitre_technique_id ? [decision.mitre_technique_id] : [],
         related_iocs: decision.correlated_ioc_ids ?? [],
         related_events: [event.id],
