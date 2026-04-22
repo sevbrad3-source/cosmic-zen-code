@@ -11,11 +11,12 @@ import { ThemeName } from "@/lib/themes";
 import { CinematicHome } from "@/components/cinematic/CinematicHome";
 import { ThreatTicker } from "@/components/cinematic/ThreatTicker";
 import { CommandPalette } from "@/components/cinematic/CommandPalette";
-import { AICopilotDock } from "@/components/cinematic/AICopilotDock";
+import { AICopilotPanel } from "@/components/cinematic/AICopilotPanel";
 import { useAutonomousAnalyst } from "@/components/cinematic/useAutonomousAnalyst";
 import { useThreatHunter } from "@/components/cinematic/useThreatHunter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getLeftPanelsForPage, getRightPanelsForPage } from "@/lib/pagePanels";
 
 const Index = () => {
   const [activeRightPanel, setActiveRightPanel] = useState("");
@@ -26,7 +27,7 @@ const Index = () => {
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [autonomous, setAutonomous] = useState(true);
-  const [dockCollapsed, setDockCollapsed] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(true);
 
   const { runs, busy, triage } = useAutonomousAnalyst({ autonomous, threshold: "medium" });
   const { hunts, busy: hunterBusy, runCycle: runHuntCycle } = useThreatHunter({ autonomous, intervalSec: 180 });
@@ -35,6 +36,21 @@ const Index = () => {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     return runs.filter((r) => r.ts >= cutoff).length;
   }, [runs]);
+
+  const allowedLeftIds = useMemo(() => getLeftPanelsForPage(mainContent), [mainContent]);
+  const allowedRightIds = useMemo(() => getRightPanelsForPage(mainContent), [mainContent]);
+
+  // When the main page changes, close any active side panel that isn't part of
+  // the new page's allowed set so the drawers stay coherent.
+  useEffect(() => {
+    if (allowedLeftIds && activeBluePanel && !allowedLeftIds.includes(activeBluePanel)) {
+      setActiveBluePanel("");
+    }
+    if (allowedRightIds && activeRightPanel && !allowedRightIds.includes(activeRightPanel)) {
+      setActiveRightPanel("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainContent]);
 
   useEffect(() => {
     document.documentElement.classList.remove("theme-cinematic", "theme-granite", "theme-compact", "theme-hacker", "theme-lcars");
@@ -71,6 +87,16 @@ const Index = () => {
     }
   }, [triageLatest, runHuntCycle]);
 
+  // Right drawer composition:
+  // - If neither copilot nor a panel is open → no drawer.
+  // - If only copilot → copilot fills full drawer height.
+  // - If only a side panel → panel fills full drawer height (existing behavior).
+  // - If both → side panel on top, copilot pinned to bottom half.
+  const showRightPanel = !!activeRightPanel;
+  const showCopilot = copilotOpen;
+  const showRightDrawer = showRightPanel || showCopilot;
+  const splitMode = showRightPanel && showCopilot;
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
       <TitleBar
@@ -81,7 +107,11 @@ const Index = () => {
       />
       <ThreatTicker />
       <div className="flex-1 flex overflow-hidden">
-        <BlueTeamActivityBar activePanel={activeBluePanel} onPanelChange={setActiveBluePanel} />
+        <BlueTeamActivityBar
+          activePanel={activeBluePanel}
+          onPanelChange={setActiveBluePanel}
+          allowedIds={allowedLeftIds}
+        />
         <BlueTeamPanel activePanel={activeBluePanel} onClose={() => setActiveBluePanel("")} />
 
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -103,20 +133,41 @@ const Index = () => {
           )}
         </div>
 
-        <RightPanel activePanel={activeRightPanel} onClose={() => setActiveRightPanel("")} />
-        <RightActivityBar activePanel={activeRightPanel} onPanelChange={setActiveRightPanel} />
+        {showRightDrawer && (
+          <div className="w-96 flex flex-col border-l border-[hsl(0,100%,18%)] bg-[hsl(0,100%,6%)] overflow-hidden">
+            {showRightPanel && (
+              <div className={splitMode ? "h-1/2 min-h-0 flex flex-col border-b border-[hsl(0,100%,18%)]" : "flex-1 min-h-0 flex flex-col"}>
+                <RightPanel
+                  activePanel={activeRightPanel}
+                  onClose={() => setActiveRightPanel("")}
+                />
+              </div>
+            )}
+            {showCopilot && (
+              <div className={splitMode ? "h-1/2 min-h-0 flex flex-col" : "flex-1 min-h-0 flex flex-col"}>
+                <AICopilotPanel
+                  runs={runs}
+                  busy={busy}
+                  autonomous={autonomous}
+                  onToggleAutonomous={() => setAutonomous((v) => { toast.success(`Autonomous mode ${!v ? "ENABLED" : "DISABLED"}`); return !v; })}
+                  onTriageLatest={triageLatest}
+                  compact={splitMode}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        <RightActivityBar
+          activePanel={activeRightPanel}
+          onPanelChange={setActiveRightPanel}
+          allowedIds={allowedRightIds}
+          copilotActive={copilotOpen}
+          onToggleCopilot={() => setCopilotOpen((v) => !v)}
+        />
       </div>
       <StatusBar />
 
-      <AICopilotDock
-        runs={runs}
-        busy={busy}
-        autonomous={autonomous}
-        onToggleAutonomous={() => setAutonomous((v) => { toast.success(`Autonomous mode ${!v ? "ENABLED" : "DISABLED"}`); return !v; })}
-        onTriageLatest={triageLatest}
-        collapsed={dockCollapsed}
-        onToggleCollapsed={() => setDockCollapsed((v) => !v)}
-      />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} onAction={handlePaletteAction} />
       <DiagnosticsToggle />
     </div>

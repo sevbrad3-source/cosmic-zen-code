@@ -5,8 +5,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { themes, ThemeName } from "@/lib/themes";
 
 interface TitleBarProps {
@@ -39,105 +44,134 @@ const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChang
   ];
 
   return (
-    <div className="h-10 bg-titlebar-bg border-b border-border flex items-center justify-between px-2">
-      <div className="flex items-center gap-3">
-        <button className="hover:bg-sidebar-hover px-2 py-1 rounded transition-colors">
-          <Menu className="w-4 h-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[hsl(0,100%,50%)] animate-pulse" />
-          <span className="text-sm font-bold tracking-wide">JOINT COMMAND CENTER</span>
+    <TooltipProvider delayDuration={250}>
+      <div className="h-10 bg-titlebar-bg border-b border-border flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          <button className="hover:bg-sidebar-hover px-2 py-1 rounded transition-colors">
+            <Menu className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[hsl(0,100%,50%)] animate-pulse" />
+            <span className="text-sm font-bold tracking-[0.2em]">JOC</span>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center gap-0.5">
+          {mainContentOptions.map((option) => {
+            const Icon = option.icon;
+            const active = mainContent === option.id;
+            return (
+              <Tooltip key={option.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onMainContentChange(option.id)}
+                    aria-label={option.label}
+                    className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-titlebar-hover text-text-secondary"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {option.label}
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label="Specialized tools"
+                    className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-titlebar-hover text-text-secondary border border-border/50 ml-1"
+                  >
+                    <Crosshair className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Specialized
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="center" className="bg-panel-bg border-border text-text-primary">
+              {specializedTools.map((tool) => (
+                <DropdownMenuItem
+                  key={tool.id}
+                  onClick={() => onMainContentChange(tool.id)}
+                  className="text-xs cursor-pointer hover:bg-sidebar-hover flex items-center gap-2"
+                >
+                  <tool.icon className="w-3 h-3" />
+                  {tool.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label="Theme"
+                    className="w-8 h-8 flex items-center justify-center text-text-secondary hover:bg-sidebar-hover rounded transition-colors"
+                  >
+                    <Palette className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Theme
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="bg-panel-bg border-border text-text-primary min-w-[160px] z-50">
+              {themes.map((theme) => (
+                <DropdownMenuItem
+                  key={theme.id}
+                  onClick={() => onThemeChange(theme.id)}
+                  className={`text-xs cursor-pointer hover:bg-sidebar-hover ${
+                    currentTheme === theme.id ? "bg-sidebar-active" : ""
+                  }`}
+                >
+                  {theme.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {user && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => signOut()}
+                  aria-label={`Sign out (${user.email ?? "user"})`}
+                  className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors text-text-secondary hover:text-primary ml-1 border-l border-border pl-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Sign out {user.email ? `(${user.email})` : ""}
+              </TooltipContent>
+            </Tooltip>
+          )}
+          <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
+            <Minimize2 className="w-4 h-4" />
+          </button>
+          <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
+            <Maximize2 className="w-4 h-4" />
+          </button>
+          <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover hover:text-primary-foreground rounded transition-colors">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
-      
-      <div className="flex-1 flex items-center justify-center gap-1">
-        {mainContentOptions.map((option) => {
-          const Icon = option.icon;
-          return (
-            <button
-              key={option.id}
-              onClick={() => onMainContentChange(option.id)}
-              className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1 text-[11px] ${
-                mainContent === option.id
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-titlebar-hover text-text-secondary"
-              }`}
-            >
-              <Icon className="w-3 h-3" />
-              <span>{option.label}</span>
-            </button>
-          );
-        })}
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="px-2.5 py-1 rounded transition-colors flex items-center gap-1 text-[11px] hover:bg-titlebar-hover text-text-secondary border border-border/50">
-              <Crosshair className="w-3 h-3" />
-              <span>Specialized</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="bg-panel-bg border-border text-text-primary">
-            {specializedTools.map((tool) => (
-              <DropdownMenuItem
-                key={tool.id}
-                onClick={() => onMainContentChange(tool.id)}
-                className="text-xs cursor-pointer hover:bg-sidebar-hover flex items-center gap-2"
-              >
-                <tool.icon className="w-3 h-3" />
-                {tool.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="flex items-center gap-1">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:bg-sidebar-hover rounded transition-colors">
-              <Palette className="w-3.5 h-3.5" />
-              <span>Theme</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-panel-bg border-border text-text-primary min-w-[160px] z-50">
-            {themes.map((theme) => (
-              <DropdownMenuItem
-                key={theme.id}
-                onClick={() => onThemeChange(theme.id)}
-                className={`text-xs cursor-pointer hover:bg-sidebar-hover ${
-                  currentTheme === theme.id ? "bg-sidebar-active" : ""
-                }`}
-              >
-                {theme.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {user && (
-          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-border">
-            <span className="text-[10px] text-text-secondary tracking-wide max-w-[140px] truncate" title={user.email ?? ""}>
-              {user.email}
-            </span>
-            <button
-              onClick={() => signOut()}
-              title="Sign out"
-              className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors text-text-secondary hover:text-primary"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-        <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
-          <Minimize2 className="w-4 h-4" />
-        </button>
-        <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
-          <Maximize2 className="w-4 h-4" />
-        </button>
-        <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover hover:text-primary-foreground rounded transition-colors">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
+    </TooltipProvider>
   );
 };
 

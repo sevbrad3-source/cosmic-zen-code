@@ -300,8 +300,8 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
   const inlineContent = renderInlineContent();
 
   return (
-    <div className="w-96 bg-[hsl(0,100%,6%)] border-l border-[hsl(0,100%,18%)] flex flex-col">
-      <div className="h-9 px-3 flex items-center justify-between border-b border-[hsl(0,100%,18%)] bg-[hsl(0,100%,8%)]">
+    <div className="flex-1 min-h-0 bg-[hsl(0,100%,6%)] flex flex-col">
+      <div className="h-9 px-3 flex items-center justify-between border-b border-[hsl(0,100%,18%)] bg-[hsl(0,100%,8%)] shrink-0">
         <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-[hsl(0,100%,60%)]" />
           <span className="text-xs uppercase tracking-wide font-semibold text-[hsl(0,100%,75%)]">
@@ -315,9 +315,9 @@ const RightPanel = ({ activePanel, onClose }: RightPanelProps) => {
           <X className="w-4 h-4 text-[hsl(0,60%,50%)]" />
         </button>
       </div>
-      
-      
-      <ScrollArea className="flex-1">
+
+
+      <ScrollArea className="flex-1 min-h-0">
         <Suspense fallback={<div className="p-4 text-xs text-text-secondary">Loading...</div>}>
           {inlineContent || renderLazyPanel()}
         </Suspense>
