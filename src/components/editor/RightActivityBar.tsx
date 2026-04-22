@@ -1,13 +1,19 @@
-import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal, UserX, Key, Upload, Antenna } from "lucide-react";
+import { Target, Zap, ShieldAlert, Radio, Crosshair, Users, Calendar, Brain, TrendingUp, Package, Syringe, Wifi, FolderOpen, Cpu, Skull, Files, Search, GitBranch, PlayCircle, Bug, Radar, Activity, Signal, UserX, Key, Upload, Antenna, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RightActivityBarProps {
   activePanel: string;
   onPanelChange: (panel: string) => void;
+  /** When provided, only the listed panel ids are shown. */
+  allowedIds?: string[] | null;
+  /** Whether the AI Copilot pin button is highlighted as active. */
+  copilotActive?: boolean;
+  /** Toggle AI Copilot visibility in the right drawer. */
+  onToggleCopilot?: () => void;
 }
 
-const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps) => {
-  const items = [
+const RightActivityBar = ({ activePanel, onPanelChange, allowedIds, copilotActive, onToggleCopilot }: RightActivityBarProps) => {
+  const allItems = [
     { id: "ai-advisor", icon: Brain, label: "AI Security Advisor" },
     { id: "social-eng", icon: UserX, label: "Social Engineering" },
     { id: "wireless-attack", icon: Antenna, label: "Wireless Attack Tools" },
@@ -35,12 +41,38 @@ const RightActivityBar = ({ activePanel, onPanelChange }: RightActivityBarProps)
     { id: "report-scheduler", icon: Calendar, label: "Report Scheduler" },
   ];
 
+  const items = allowedIds && allowedIds.length > 0
+    ? allItems.filter((i) => allowedIds.includes(i.id))
+    : allItems;
+
   return (
     <div className="w-12 bg-[hsl(0,100%,8%)] border-l border-[hsl(0,100%,20%)] flex flex-col items-center py-2 gap-0.5 overflow-y-auto scrollbar-thin">
       <div className="w-8 h-8 mb-2 flex items-center justify-center rounded bg-[hsl(0,100%,25%)]">
         <Skull className="w-5 h-5 text-[hsl(0,100%,70%)]" />
       </div>
       <TooltipProvider delayDuration={300}>
+        {onToggleCopilot && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onToggleCopilot}
+                className={`w-12 h-9 flex items-center justify-center transition-colors relative group ${
+                  copilotActive
+                    ? "text-[hsl(0,100%,70%)] bg-[hsl(0,100%,15%)]"
+                    : "text-[hsl(0,60%,50%)] hover:text-[hsl(0,100%,70%)] hover:bg-[hsl(0,100%,12%)]"
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                {copilotActive && (
+                  <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[hsl(0,100%,50%)]" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="bg-[hsl(0,100%,12%)] border-[hsl(0,100%,25%)] text-[hsl(0,100%,85%)]">
+              Autonomous SOC Copilot
+            </TooltipContent>
+          </Tooltip>
+        )}
         {items.map((item) => (
           <Tooltip key={item.id}>
             <TooltipTrigger asChild>

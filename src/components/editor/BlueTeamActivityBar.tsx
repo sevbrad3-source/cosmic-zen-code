@@ -4,10 +4,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface BlueTeamActivityBarProps {
   activePanel: string;
   onPanelChange: (panel: string) => void;
+  /** When provided, only the listed panel ids are shown. */
+  allowedIds?: string[] | null;
 }
 
-const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBarProps) => {
-  const items = [
+const BlueTeamActivityBar = ({ activePanel, onPanelChange, allowedIds }: BlueTeamActivityBarProps) => {
+  const allItems = [
     { id: "global-dashboard", icon: Activity, label: "Global Threat Dashboard" },
     { id: "live-metrics", icon: BarChart3, label: "Live Metrics Dashboard" },
     { id: "threat-scoring", icon: Calculator, label: "Threat Scoring" },
@@ -46,6 +48,10 @@ const BlueTeamActivityBar = ({ activePanel, onPanelChange }: BlueTeamActivityBar
     { id: "deception", icon: Layers, label: "Deception Technology" },
     { id: "attack-path", icon: Zap, label: "Attack Path Analysis" },
   ];
+
+  const items = allowedIds && allowedIds.length > 0
+    ? allItems.filter((i) => allowedIds.includes(i.id))
+    : allItems;
 
   return (
     <div className="w-12 bg-[hsl(210,100%,8%)] border-r border-[hsl(210,100%,20%)] flex flex-col items-center py-2 gap-1">
