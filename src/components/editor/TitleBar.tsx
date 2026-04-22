@@ -1,4 +1,5 @@
-import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu, Shield, Brain } from "lucide-react";
+import { Menu, Minimize2, Maximize2, X, Palette, FileText, Network, Globe, Zap, Clock, Link, FileBarChart, Crosshair, Fingerprint, Radar, Cpu, Shield, Brain, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ interface TitleBarProps {
 }
 
 const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChange }: TitleBarProps) => {
+  const { user, signOut } = useAuth();
   const mainContentOptions = [
     { id: "command", label: "Command Center", icon: Brain },
     { id: "joc", label: "Joint Ops Center", icon: Shield },
@@ -111,6 +113,20 @@ const TitleBar = ({ currentTheme, onThemeChange, mainContent, onMainContentChang
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        {user && (
+          <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-border">
+            <span className="text-[10px] text-text-secondary tracking-wide max-w-[140px] truncate" title={user.email ?? ""}>
+              {user.email}
+            </span>
+            <button
+              onClick={() => signOut()}
+              title="Sign out"
+              className="w-7 h-7 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors text-text-secondary hover:text-primary"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         <button className="w-8 h-8 flex items-center justify-center hover:bg-sidebar-hover rounded transition-colors">
           <Minimize2 className="w-4 h-4" />
         </button>
